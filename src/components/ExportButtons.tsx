@@ -20,10 +20,9 @@ export function ExportButtons({ results, metrics }: ExportButtonsProps) {
       'Google Postal Code': r.googlePostalCode || '',
       'Google LGA': r.googleLga || '',
       'Google Area': r.googleArea || '',
-      'Matched Postal Code': r.matchedPostalCode || '',
-      'Confidence %': r.confidence.toFixed(1),
+      'Final Postal Code': r.finalPostalCode || '',
+      Source: r.postalCodeSource,
       Status: r.status,
-      'Match Type': r.matchType,
       'Failure Reason': r.failureReason || '',
     }));
 
@@ -48,39 +47,39 @@ Generated: ${new Date().toLocaleString()}
 EXECUTIVE SUMMARY
 -----------------
 Viability Status: ${metrics.viability.toUpperCase()}
-Success Rate: ${metrics.successRate.toFixed(1)}%
+Google Postal Code Rate: ${metrics.googleRate.toFixed(1)}%
+Total Success Rate: ${metrics.totalSuccessRate.toFixed(1)}%
 Total Tested: ${metrics.total}
 
 DETAILED METRICS
 ----------------
-High Confidence (>80%): ${metrics.highConfidence}/${metrics.total}
-Medium Confidence (50-79%): ${metrics.mediumConfidence}/${metrics.total}
-Low/Failed (<50%): ${metrics.lowConfidence}/${metrics.total}
-Google Returned Postal Code: ${metrics.googleReturnedPostalCode}/${metrics.total}
+Google Returned Postal Code: ${metrics.googleReturned}/${metrics.total} (PRIMARY)
+Database Fallback Matches: ${metrics.databaseFallback}/${metrics.total} (SECONDARY)
+Failed (No Postal Code): ${metrics.failed}/${metrics.total}
 
 VIABILITY VERDICT
 -----------------
 ${metrics.viability === 'viable' 
-  ? '✅ YES - Proceed with confidence. The GPS → Address → Postal Code approach shows excellent accuracy.'
+  ? '✅ VIABLE - Google Maps returns postal codes for >85% of locations. This approach is production-ready.'
   : metrics.viability === 'conditional'
-  ? '⚠️ CONDITIONAL - Needs improvements. Consider expanding the postal code database and improving area matching.'
-  : '❌ NO - Consider alternatives. The current approach has too many failures.'}
+  ? '⚠️ CONDITIONAL - Google returns postal codes for 75-85% of locations. Database fallback covers remaining cases.'
+  : '❌ NOT VIABLE - Google returns postal codes for <75% of locations. Consider alternatives.'}
 
 RECOMMENDATIONS
 ---------------
 ${metrics.viability === 'viable' 
-  ? '1. Proceed with production implementation\n2. Monitor accuracy over time\n3. Add user feedback loop for corrections'
+  ? '1. Proceed with production implementation using Google postal codes\n2. Keep database fallback for edge cases\n3. Monitor accuracy over time'
   : metrics.viability === 'conditional'
-  ? '1. Expand postal code database\n2. Improve fuzzy matching\n3. Add fallback to manual entry\n4. Consider partial deployment'
-  : '1. Research official postal code APIs\n2. Partner with NIPOST\n3. Consider user self-selection\n4. Implement manual verification workflow'}
+  ? '1. Use Google postal codes as primary source\n2. Expand database fallback for uncovered areas\n3. Consider manual entry for remaining failures'
+  : '1. Research alternative postal code APIs\n2. Consider NIPOST partnership\n3. Implement manual verification workflow\n4. Expand database significantly'}
 
 INDIVIDUAL RESULTS
 ------------------
 ${results.map((r, i) => 
   `${i + 1}. ${r.locationName}
-   - Confidence: ${r.confidence.toFixed(0)}%
-   - Status: ${r.status}
-   - Matched: ${r.matchedPostalCode || 'None'}
+   - Status: ${r.status.toUpperCase()}
+   - Final Postal Code: ${r.finalPostalCode || 'None'}
+   - Source: ${r.postalCodeSource}
    - Google Address: ${r.googleAddress || 'N/A'}
    ${r.failureReason ? `   - Failure: ${r.failureReason}` : ''}
 `).join('\n')}

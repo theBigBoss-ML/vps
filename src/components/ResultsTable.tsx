@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { TestResult } from '@/types/validation';
-import { ChevronDown, ChevronUp, Check, AlertTriangle, X, MapPin } from 'lucide-react';
+import { ChevronDown, ChevronUp, Check, Database, X, MapPin } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -13,20 +13,23 @@ interface ResultsTableProps {
 }
 
 export function ResultsTable({ results }: ResultsTableProps) {
-  const [sortField, setSortField] = useState<'confidence' | 'name'>('confidence');
+  const [sortField, setSortField] = useState<'source' | 'name'>('source');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [selectedResult, setSelectedResult] = useState<TestResult | null>(null);
 
   const sortedResults = [...results].sort((a, b) => {
-    if (sortField === 'confidence') {
-      return sortDir === 'desc' ? b.confidence - a.confidence : a.confidence - b.confidence;
+    if (sortField === 'source') {
+      const order = { google: 3, database: 2, none: 1 };
+      const aVal = order[a.postalCodeSource];
+      const bVal = order[b.postalCodeSource];
+      return sortDir === 'desc' ? bVal - aVal : aVal - bVal;
     }
     return sortDir === 'desc' 
       ? b.locationName.localeCompare(a.locationName)
       : a.locationName.localeCompare(b.locationName);
   });
 
-  const handleSort = (field: 'confidence' | 'name') => {
+  const handleSort = (field: 'source' | 'name') => {
     if (sortField === field) {
       setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
     } else {
@@ -39,40 +42,28 @@ export function ResultsTable({ results }: ResultsTableProps) {
     switch (status) {
       case 'success':
         return <Check className="h-4 w-4 text-success" />;
-      case 'partial':
-        return <AlertTriangle className="h-4 w-4 text-warning" />;
+      case 'fallback':
+        return <Database className="h-4 w-4 text-warning" />;
       case 'failed':
         return <X className="h-4 w-4 text-destructive" />;
     }
   };
 
-  const getMatchTypeBadge = (matchType: TestResult['matchType']) => {
+  const getSourceBadge = (source: TestResult['postalCodeSource']) => {
     const colors = {
-      exact: 'bg-success/20 text-success',
-      area: 'bg-primary/20 text-primary',
-      lga: 'bg-warning/20 text-warning',
-      fuzzy: 'bg-chart-info/20 text-chart-info',
+      google: 'bg-success/20 text-success',
+      database: 'bg-warning/20 text-warning',
       none: 'bg-destructive/20 text-destructive',
+    };
+    const labels = {
+      google: 'Google',
+      database: 'Fallback',
+      none: 'None',
     };
 
     return (
-      <span className={`status-badge ${colors[matchType]}`}>
-        {matchType.charAt(0).toUpperCase() + matchType.slice(1)}
-      </span>
-    );
-  };
-
-  const getConfidenceBadge = (confidence: number) => {
-    let colorClass = 'bg-destructive/20 text-destructive';
-    if (confidence >= 80) {
-      colorClass = 'bg-success/20 text-success';
-    } else if (confidence >= 50) {
-      colorClass = 'bg-warning/20 text-warning';
-    }
-
-    return (
-      <span className={`status-badge font-mono ${colorClass}`}>
-        {confidence.toFixed(0)}%
+      <span className={`status-badge ${colors[source]}`}>
+        {labels[source]}
       </span>
     );
   };
@@ -97,21 +88,19 @@ export function ResultsTable({ results }: ResultsTableProps) {
                   </div>
                 </th>
                 <th>Google Address</th>
-                <th>Google Postal</th>
-                <th>Our Match</th>
+                <th>Final Postal Code</th>
                 <th 
                   className="cursor-pointer hover:text-foreground transition-colors"
-                  onClick={() => handleSort('confidence')}
+                  onClick={() => handleSort('source')}
                 >
                   <div className="flex items-center gap-1">
-                    Confidence
-                    {sortField === 'confidence' && (
+                    Source
+                    {sortField === 'source' && (
                       sortDir === 'desc' ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />
                     )}
                   </div>
                 </th>
                 <th>Status</th>
-                <th>Match Type</th>
               </tr>
             </thead>
             <tbody>
@@ -126,24 +115,18 @@ export function ResultsTable({ results }: ResultsTableProps) {
                   <td className="text-sm text-muted-foreground max-w-xs truncate">
                     {result.googleAddress || '--'}
                   </td>
-                  <td className="font-mono">
-                    {result.googlePostalCode || (
+                  <td className="font-mono font-medium text-primary text-lg">
+                    {result.finalPostalCode || (
                       <span className="text-muted-foreground">--</span>
                     )}
                   </td>
-                  <td className="font-mono font-medium text-primary">
-                    {result.matchedPostalCode || (
-                      <span className="text-muted-foreground">--</span>
-                    )}
-                  </td>
-                  <td>{getConfidenceBadge(result.confidence)}</td>
+                  <td>{getSourceBadge(result.postalCodeSource)}</td>
                   <td>
                     <div className="flex items-center gap-2">
                       {getStatusIcon(result.status)}
                       <span className="text-sm capitalize">{result.status}</span>
                     </div>
                   </td>
-                  <td>{getMatchTypeBadge(result.matchType)}</td>
                 </tr>
               ))}
             </tbody>
@@ -170,9 +153,10 @@ export function ResultsTable({ results }: ResultsTableProps) {
                   </div>
                 </div>
                 <div className="p-4 bg-muted/30 rounded-lg">
-                  <div className="text-xs text-muted-foreground uppercase mb-1">Confidence</div>
-                  <div className="font-mono text-2xl font-bold">
-                    {selectedResult.confidence.toFixed(1)}%
+                  <div className="text-xs text-muted-foreground uppercase mb-1">Source</div>
+                  <div className="flex items-center gap-2">
+                    {getStatusIcon(selectedResult.status)}
+                    {getSourceBadge(selectedResult.postalCodeSource)}
                   </div>
                 </div>
               </div>
@@ -194,29 +178,24 @@ export function ResultsTable({ results }: ResultsTableProps) {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-muted/30 rounded-lg">
+                <div className={`p-4 rounded-lg border ${selectedResult.postalCodeSource === 'google' ? 'bg-success/10 border-success/30' : 'bg-muted/30 border-muted/30'}`}>
                   <div className="text-xs text-muted-foreground uppercase mb-1">Google Postal Code</div>
-                  <div className="font-mono text-lg">{selectedResult.googlePostalCode || '--'}</div>
+                  <div className={`font-mono text-lg ${selectedResult.googlePostalCode ? 'font-bold text-success' : ''}`}>
+                    {selectedResult.googlePostalCode || '--'}
+                  </div>
                 </div>
-                <div className="p-4 bg-primary/10 rounded-lg border border-primary/30">
-                  <div className="text-xs text-muted-foreground uppercase mb-1">Our Matched Postal Code</div>
-                  <div className="font-mono text-lg font-bold text-primary">
-                    {selectedResult.matchedPostalCode || '--'}
+                <div className={`p-4 rounded-lg border ${selectedResult.postalCodeSource === 'database' ? 'bg-warning/10 border-warning/30' : 'bg-muted/30 border-muted/30'}`}>
+                  <div className="text-xs text-muted-foreground uppercase mb-1">Database Fallback</div>
+                  <div className={`font-mono text-lg ${selectedResult.fallbackPostalCode ? 'font-bold text-warning' : ''}`}>
+                    {selectedResult.fallbackPostalCode || '--'}
                   </div>
                 </div>
               </div>
 
-              <div className="flex gap-4">
-                <div className="flex-1 p-4 bg-muted/30 rounded-lg">
-                  <div className="text-xs text-muted-foreground uppercase mb-1">Match Type</div>
-                  {getMatchTypeBadge(selectedResult.matchType)}
-                </div>
-                <div className="flex-1 p-4 bg-muted/30 rounded-lg">
-                  <div className="text-xs text-muted-foreground uppercase mb-1">Status</div>
-                  <div className="flex items-center gap-2">
-                    {getStatusIcon(selectedResult.status)}
-                    <span className="capitalize">{selectedResult.status}</span>
-                  </div>
+              <div className="p-4 bg-primary/10 rounded-lg border-2 border-primary/30">
+                <div className="text-xs text-muted-foreground uppercase mb-1">Final Postal Code</div>
+                <div className="font-mono text-2xl font-bold text-primary">
+                  {selectedResult.finalPostalCode || 'Not Found'}
                 </div>
               </div>
 
