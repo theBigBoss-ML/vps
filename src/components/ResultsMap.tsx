@@ -29,9 +29,9 @@ export function ResultsMap({
 }: ResultsMapProps) {
   const getMarkerColor = (result?: TestResult) => {
     if (!result) return '#3b82f6'; // blue for coordinates without results
-    if (result.confidence >= 80) return '#10b981'; // success
-    if (result.confidence >= 50) return '#f59e0b'; // warning
-    return '#ef4444'; // error
+    if (result.postalCodeSource === 'google') return '#10b981'; // success - green
+    if (result.postalCodeSource === 'database') return '#f59e0b'; // fallback - yellow
+    return '#ef4444'; // failed - red
   };
 
   const getTypeColor = (type: TestCoordinate['type']) => {
@@ -72,10 +72,10 @@ export function ResultsMap({
               <div className="text-sm space-y-1">
                 <div className="font-semibold">{result.locationName}</div>
                 <div className="text-xs">
-                  Confidence: <span className="font-mono font-bold">{result.confidence.toFixed(0)}%</span>
+                  Postal Code: <span className="font-mono font-bold">{result.finalPostalCode || 'None'}</span>
                 </div>
                 <div className="text-xs">
-                  Matched: <span className="font-mono">{result.matchedPostalCode || 'None'}</span>
+                  Source: <span className="font-mono capitalize">{result.postalCodeSource}</span>
                 </div>
                 <div className="text-xs capitalize">
                   Status: {result.status}
@@ -117,15 +117,15 @@ export function ResultsMap({
           <div className="space-y-1 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-success" />
-              <span>High Confidence (&gt;80%)</span>
+              <span>Google (Direct)</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-warning" />
-              <span>Medium (50-79%)</span>
+              <span>Database (Fallback)</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-destructive" />
-              <span>Low/Failed (&lt;50%)</span>
+              <span>Failed</span>
             </div>
           </div>
         ) : (

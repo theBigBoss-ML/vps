@@ -25,8 +25,8 @@ export function ViabilityVerdict({ metrics }: ViabilityVerdictProps) {
   const verdictConfig = {
     viable: {
       icon: <CheckCircle className="h-16 w-16" />,
-      title: '✅ YES - Proceed with confidence',
-      description: 'The GPS → Address → Postal Code approach shows excellent accuracy. You can build this into production with high confidence.',
+      title: '✅ VIABLE - Google returns postal codes reliably',
+      description: 'Google Maps Geocoding API returns postal codes for >85% of locations. This approach is production-ready.',
       color: 'text-success',
       bgColor: 'bg-success/10',
       borderColor: 'border-success/30',
@@ -34,8 +34,8 @@ export function ViabilityVerdict({ metrics }: ViabilityVerdictProps) {
     },
     conditional: {
       icon: <AlertTriangle className="h-16 w-16" />,
-      title: '⚠️ CONDITIONAL - Needs improvements',
-      description: 'The approach works but has gaps. Consider expanding the postal code database and improving area matching before production.',
+      title: '⚠️ CONDITIONAL - Good enough with fallback',
+      description: 'Google returns postal codes for 75-85% of locations. Database fallback covers remaining cases.',
       color: 'text-warning',
       bgColor: 'bg-warning/10',
       borderColor: 'border-warning/30',
@@ -43,8 +43,8 @@ export function ViabilityVerdict({ metrics }: ViabilityVerdictProps) {
     },
     'not-viable': {
       icon: <XCircle className="h-16 w-16" />,
-      title: '❌ NO - Consider alternatives',
-      description: 'The current approach has too many failures. Consider using official postal code APIs, expanding the database significantly, or implementing manual verification.',
+      title: '❌ NOT VIABLE - Consider alternatives',
+      description: 'Google returns postal codes for <75% of locations. This approach needs significant improvement or alternatives.',
       color: 'text-destructive',
       bgColor: 'bg-destructive/10',
       borderColor: 'border-destructive/30',
@@ -76,17 +76,17 @@ export function ViabilityVerdict({ metrics }: ViabilityVerdictProps) {
       </p>
 
       <div className="mt-6 grid grid-cols-3 gap-4 max-w-md mx-auto text-sm">
-        <div className="p-3 rounded-lg bg-muted/30">
-          <div className="font-bold text-foreground">{metrics.successRate.toFixed(1)}%</div>
-          <div className="text-muted-foreground">Success Rate</div>
+        <div className="p-3 rounded-lg bg-success/20 border border-success/30">
+          <div className="font-bold text-success text-lg">{metrics.googleRate.toFixed(1)}%</div>
+          <div className="text-muted-foreground">Google Rate</div>
+        </div>
+        <div className="p-3 rounded-lg bg-warning/20 border border-warning/30">
+          <div className="font-bold text-warning text-lg">{metrics.databaseFallback}</div>
+          <div className="text-muted-foreground">Fallback</div>
         </div>
         <div className="p-3 rounded-lg bg-muted/30">
-          <div className="font-bold text-foreground">{metrics.highConfidence}</div>
-          <div className="text-muted-foreground">High Conf.</div>
-        </div>
-        <div className="p-3 rounded-lg bg-muted/30">
-          <div className="font-bold text-foreground">{metrics.lowConfidence}</div>
-          <div className="text-muted-foreground">Failed</div>
+          <div className="font-bold text-foreground text-lg">{metrics.totalSuccessRate.toFixed(1)}%</div>
+          <div className="text-muted-foreground">Total Success</div>
         </div>
       </div>
     </div>

@@ -74,6 +74,7 @@ export async function runValidationTest(
     let result: TestResult;
 
     if (!geocodeResult.formattedAddress) {
+      // API failed completely
       result = {
         id: `result-${coord.id}`,
         coordinateId: coord.id,
@@ -84,42 +85,15 @@ export async function runValidationTest(
         googlePostalCode: null,
         googleLga: null,
         googleArea: null,
-        matchedPostalCode: null,
-        confidence: 0,
+        finalPostalCode: null,
+        postalCodeSource: 'none',
+        fallbackPostalCode: null,
         status: 'failed',
-        matchType: 'none',
         failureReason: 'Google API did not return an address',
         rawGoogleResponse: geocodeResult.raw,
       };
-    } else {
-      const matchResult = matchAddressToPostalCode(
-        geocodeResult.formattedAddress,
-        geocodeResult.components.lga,
-        geocodeResult.components.area,
-        postalCodes
-      );
-
-      let status: 'success' | 'partial' | 'failed';
-      let failureReason: string | null = null;
-
-      if (matchResult.confidence >= 80) {
-        status = 'success';
-      } else if (matchResult.confidence >= 50) {
-        status = 'partial';
-        failureReason = matchResult.matchType === 'lga' 
-          ? 'Only LGA-level match available'
-          : 'Partial area match only';
-      } else {
-        status = 'failed';
-        if (!matchResult.postalCode) {
-          failureReason = geocodeResult.components.lga 
-            ? 'No postal code in database for this LGA/area'
-            : 'Could not identify LGA from Google address';
-        } else {
-          failureReason = 'Address format does not match database entries';
-        }
-      }
-
+    } else if (geocodeResult.components.postalCode) {
+      // SUCCESS: Google returned a postal code directly
       result = {
         id: `result-${coord.id}`,
         coordinateId: coord.id,
@@ -130,13 +104,63 @@ export async function runValidationTest(
         googlePostalCode: geocodeResult.components.postalCode,
         googleLga: geocodeResult.components.lga,
         googleArea: geocodeResult.components.area,
-        matchedPostalCode: matchResult.postalCode?.postalCode || null,
-        confidence: matchResult.confidence,
-        status,
-        matchType: matchResult.matchType,
-        failureReason,
+        finalPostalCode: geocodeResult.components.postalCode,
+        postalCodeSource: 'google',
+        fallbackPostalCode: null,
+        status: 'success',
+        failureReason: null,
         rawGoogleResponse: geocodeResult.raw,
       };
+    } else {
+      // Google didn't return postal code - try database fallback
+      const matchResult = matchAddressToPostalCode(
+        geocodeResult.formattedAddress,
+        geocodeResult.components.lga,
+        geocodeResult.components.area,
+        postalCodes
+      );
+
+      if (matchResult.postalCode && matchResult.confidence >= 50) {
+        // FALLBACK SUCCESS: Found in database
+        result = {
+          id: `result-${coord.id}`,
+          coordinateId: coord.id,
+          locationName: coord.name,
+          latitude: coord.latitude,
+          longitude: coord.longitude,
+          googleAddress: geocodeResult.formattedAddress,
+          googlePostalCode: null,
+          googleLga: geocodeResult.components.lga,
+          googleArea: geocodeResult.components.area,
+          finalPostalCode: matchResult.postalCode.postalCode,
+          postalCodeSource: 'database',
+          fallbackPostalCode: matchResult.postalCode.postalCode,
+          status: 'fallback',
+          failureReason: null,
+          rawGoogleResponse: geocodeResult.raw,
+        };
+      } else {
+        // FAILED: No postal code from Google and no database match
+        result = {
+          id: `result-${coord.id}`,
+          coordinateId: coord.id,
+          locationName: coord.name,
+          latitude: coord.latitude,
+          longitude: coord.longitude,
+          googleAddress: geocodeResult.formattedAddress,
+          googlePostalCode: null,
+          googleLga: geocodeResult.components.lga,
+          googleArea: geocodeResult.components.area,
+          finalPostalCode: null,
+          postalCodeSource: 'none',
+          fallbackPostalCode: null,
+          status: 'failed',
+          failureReason: geocodeResult.components.lga 
+            ? 'Google did not return postal code and no database match found'
+            : 'Could not identify LGA from Google address',
+          rawGoogleResponse: geocodeResult.raw,
+        };
+      }
     }
 
     results.push(result);
@@ -150,24 +174,24 @@ export async function runValidationTest(
 
 export function calculateMetrics(results: TestResult[]): {
   total: number;
-  highConfidence: number;
-  mediumConfidence: number;
-  lowConfidence: number;
-  googleReturnedPostalCode: number;
-  successRate: number;
+  googleReturned: number;
+  databaseFallback: number;
+  failed: number;
+  googleRate: number;
+  totalSuccessRate: number;
   viability: 'viable' | 'conditional' | 'not-viable';
 } {
   const total = results.length;
-  const highConfidence = results.filter(r => r.confidence >= 80).length;
-  const mediumConfidence = results.filter(r => r.confidence >= 50 && r.confidence < 80).length;
-  const lowConfidence = results.filter(r => r.confidence < 50).length;
-  const googleReturnedPostalCode = results.filter(r => r.googlePostalCode !== null).length;
-  const successRate = total > 0 ? (highConfidence / total) * 100 : 0;
+  const googleReturned = results.filter(r => r.postalCodeSource === 'google').length;
+  const databaseFallback = results.filter(r => r.postalCodeSource === 'database').length;
+  const failed = results.filter(r => r.status === 'failed').length;
+  const googleRate = total > 0 ? (googleReturned / total) * 100 : 0;
+  const totalSuccessRate = total > 0 ? ((googleReturned + databaseFallback) / total) * 100 : 0;
 
   let viability: 'viable' | 'conditional' | 'not-viable';
-  if (successRate >= 90) {
+  if (googleRate >= 85) {
     viability = 'viable';
-  } else if (successRate >= 80) {
+  } else if (googleRate >= 75) {
     viability = 'conditional';
   } else {
     viability = 'not-viable';
@@ -175,11 +199,11 @@ export function calculateMetrics(results: TestResult[]): {
 
   return {
     total,
-    highConfidence,
-    mediumConfidence,
-    lowConfidence,
-    googleReturnedPostalCode,
-    successRate,
+    googleReturned,
+    databaseFallback,
+    failed,
+    googleRate,
+    totalSuccessRate,
     viability,
   };
 }
@@ -189,7 +213,7 @@ export function analyzeFailures(results: TestResult[]): {
   count: number;
   locations: string[];
 }[] {
-  const failedResults = results.filter(r => r.status === 'failed' || r.status === 'partial');
+  const failedResults = results.filter(r => r.status === 'failed');
   const reasonMap = new Map<string, string[]>();
 
   for (const result of failedResults) {

@@ -1,4 +1,4 @@
-import { CheckCircle, AlertTriangle, XCircle, BarChart3, MapPin } from 'lucide-react';
+import { MapPin, Database, XCircle, BarChart3, Target } from 'lucide-react';
 import { TestMetrics } from '@/types/validation';
 
 interface MetricsCardsProps {
@@ -24,38 +24,40 @@ export function MetricsCards({ metrics, isLoading }: MetricsCardsProps) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <MetricCard
-          icon={<CheckCircle className="h-5 w-5" />}
-          label="High Confidence"
+          icon={<MapPin className="h-5 w-5" />}
+          label="Google Postal Code"
           value="--"
-          sublabel=">80%"
+          sublabel="Primary source"
           color="success"
+          isPrimary
         />
         <MetricCard
-          icon={<AlertTriangle className="h-5 w-5" />}
-          label="Medium Confidence"
+          icon={<Database className="h-5 w-5" />}
+          label="Database Fallback"
           value="--"
-          sublabel="50-79%"
+          sublabel="Secondary source"
           color="warning"
         />
         <MetricCard
           icon={<XCircle className="h-5 w-5" />}
-          label="Low/Failed"
+          label="Failed"
           value="--"
-          sublabel="<50%"
+          sublabel="No postal code"
           color="error"
         />
         <MetricCard
-          icon={<BarChart3 className="h-5 w-5" />}
-          label="Success Rate"
+          icon={<Target className="h-5 w-5" />}
+          label="Google Rate"
           value="--"
-          sublabel="Overall"
+          sublabel="Key metric"
           color="info"
+          isPrimary
         />
         <MetricCard
-          icon={<MapPin className="h-5 w-5" />}
-          label="Google Postal Codes"
+          icon={<BarChart3 className="h-5 w-5" />}
+          label="Total Success"
           value="--"
-          sublabel="API returned"
+          sublabel="Google + Fallback"
           color="info"
         />
       </div>
@@ -65,38 +67,40 @@ export function MetricsCards({ metrics, isLoading }: MetricsCardsProps) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
       <MetricCard
-        icon={<CheckCircle className="h-5 w-5" />}
-        label="High Confidence"
-        value={`${metrics.highConfidence}/${metrics.total}`}
-        sublabel=">80%"
+        icon={<MapPin className="h-5 w-5" />}
+        label="Google Postal Code"
+        value={`${metrics.googleReturned}/${metrics.total}`}
+        sublabel="Primary source"
         color="success"
+        isPrimary
       />
       <MetricCard
-        icon={<AlertTriangle className="h-5 w-5" />}
-        label="Medium Confidence"
-        value={`${metrics.mediumConfidence}/${metrics.total}`}
-        sublabel="50-79%"
+        icon={<Database className="h-5 w-5" />}
+        label="Database Fallback"
+        value={`${metrics.databaseFallback}/${metrics.total}`}
+        sublabel="Secondary source"
         color="warning"
       />
       <MetricCard
         icon={<XCircle className="h-5 w-5" />}
-        label="Low/Failed"
-        value={`${metrics.lowConfidence}/${metrics.total}`}
-        sublabel="<50%"
+        label="Failed"
+        value={`${metrics.failed}/${metrics.total}`}
+        sublabel="No postal code"
         color="error"
       />
       <MetricCard
-        icon={<BarChart3 className="h-5 w-5" />}
-        label="Success Rate"
-        value={`${metrics.successRate.toFixed(1)}%`}
-        sublabel="Overall"
+        icon={<Target className="h-5 w-5" />}
+        label="Google Rate"
+        value={`${metrics.googleRate.toFixed(1)}%`}
+        sublabel="Key metric"
         color="info"
+        isPrimary
       />
       <MetricCard
-        icon={<MapPin className="h-5 w-5" />}
-        label="Google Postal Codes"
-        value={`${metrics.googleReturnedPostalCode}/${metrics.total}`}
-        sublabel="API returned"
+        icon={<BarChart3 className="h-5 w-5" />}
+        label="Total Success"
+        value={`${metrics.totalSuccessRate.toFixed(1)}%`}
+        sublabel="Google + Fallback"
         color="info"
       />
     </div>
@@ -109,9 +113,10 @@ interface MetricCardProps {
   value: string;
   sublabel: string;
   color: 'success' | 'warning' | 'error' | 'info';
+  isPrimary?: boolean;
 }
 
-function MetricCard({ icon, label, value, sublabel, color }: MetricCardProps) {
+function MetricCard({ icon, label, value, sublabel, color, isPrimary }: MetricCardProps) {
   const colorClasses = {
     success: 'text-success glow-success',
     warning: 'text-warning glow-warning',
@@ -127,7 +132,7 @@ function MetricCard({ icon, label, value, sublabel, color }: MetricCardProps) {
   };
 
   return (
-    <div className={`metric-card ${colorClasses[color]}`}>
+    <div className={`metric-card ${colorClasses[color]} ${isPrimary ? 'ring-2 ring-primary/50' : ''}`}>
       <div className="flex items-center gap-2 mb-3">
         <div className={`p-1.5 rounded-lg ${iconBgClasses[color]}`}>
           {icon}

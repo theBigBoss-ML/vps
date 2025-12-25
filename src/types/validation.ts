@@ -8,10 +8,10 @@ export interface TestResult {
   googlePostalCode: string | null;
   googleLga: string | null;
   googleArea: string | null;
-  matchedPostalCode: string | null;
-  confidence: number;
-  status: 'success' | 'partial' | 'failed';
-  matchType: 'exact' | 'area' | 'lga' | 'fuzzy' | 'none';
+  finalPostalCode: string | null;
+  postalCodeSource: 'google' | 'database' | 'none';
+  fallbackPostalCode: string | null;
+  status: 'success' | 'fallback' | 'failed';
   failureReason: string | null;
   rawGoogleResponse: any;
 }
@@ -25,11 +25,11 @@ export interface TestProgress {
 
 export interface TestMetrics {
   total: number;
-  highConfidence: number;
-  mediumConfidence: number;
-  lowConfidence: number;
-  googleReturnedPostalCode: number;
-  successRate: number;
+  googleReturned: number;
+  databaseFallback: number;
+  failed: number;
+  googleRate: number;
+  totalSuccessRate: number;
   viability: 'viable' | 'conditional' | 'not-viable';
 }
 
