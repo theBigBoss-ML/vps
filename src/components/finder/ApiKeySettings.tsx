@@ -25,6 +25,9 @@ export function ApiKeySettings({ onKeyUpdate }: ApiKeySettingsProps) {
   const [isTesting, setIsTesting] = useState(false);
   const [hasKey, setHasKey] = useState(false);
 
+  // If env variable is set, don't show settings at all
+  const hasEnvKey = !!import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
   useEffect(() => {
     const stored = localStorage.getItem(API_KEY_STORAGE);
     if (stored) {
@@ -32,6 +35,11 @@ export function ApiKeySettings({ onKeyUpdate }: ApiKeySettingsProps) {
       setHasKey(true);
     }
   }, [open]);
+
+  // Don't render if env key exists
+  if (hasEnvKey) {
+    return null;
+  }
 
   const testApiKey = async (key: string): Promise<boolean> => {
     try {
