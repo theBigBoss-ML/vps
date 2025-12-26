@@ -8,6 +8,7 @@ import { RecentLocations } from '@/components/finder/RecentLocations';
 import { ErrorMessage } from '@/components/finder/ErrorMessage';
 import { LoadingState } from '@/components/finder/LoadingState';
 import { ThemeToggle } from '@/components/finder/ThemeToggle';
+import { ApiKeySettings, getStoredApiKey } from '@/components/finder/ApiKeySettings';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useRecentLocations } from '@/hooks/useRecentLocations';
 import { useTheme } from '@/hooks/useTheme';
@@ -16,19 +17,20 @@ import { rateLimitedGetPostalCode } from '@/lib/postalCodeService';
 import { defaultPostalCodes } from '@/data/postalCodes';
 import { toast } from 'sonner';
 
-const API_KEY_STORAGE = 'nigeria-postal-api-key';
-
 const Index = () => {
   const [status, setStatus] = useState<LookupStatus>('idle');
   const [result, setResult] = useState<LocationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   
+  const [apiKeyVersion, setApiKeyVersion] = useState(0);
   const { getCurrentPosition, error: geoError, clearError } = useGeolocation();
   const { recentLocations, addRecentLocation, clearRecentLocations } = useRecentLocations();
   const { theme, toggleTheme } = useTheme();
 
   const getApiKey = (): string => {
-    return localStorage.getItem(API_KEY_STORAGE) || import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+    // Force re-read when apiKeyVersion changes
+    void apiKeyVersion;
+    return getStoredApiKey() || import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
   };
 
   const handleDetectLocation = useCallback(async () => {
@@ -48,7 +50,7 @@ const Index = () => {
     
     if (!apiKey) {
       setStatus('error');
-      setError('Google Maps API key not configured. Please contact support.');
+      setError('Please configure your Google Maps API key in Settings (gear icon in header).');
       return;
     }
 
@@ -148,7 +150,10 @@ const Index = () => {
               <p className="text-xs text-muted-foreground hidden sm:block">Find your Nigerian postal code</p>
             </div>
           </div>
-          <ThemeToggle theme={theme} onToggle={toggleTheme} />
+          <div className="flex items-center gap-1">
+            <ApiKeySettings onKeyUpdate={() => setApiKeyVersion(v => v + 1)} />
+            <ThemeToggle theme={theme} onToggle={toggleTheme} />
+          </div>
         </div>
       </header>
 
