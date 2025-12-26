@@ -170,5 +170,6 @@ export function ApiKeySettings({ onKeyUpdate }: ApiKeySettingsProps) {
 }
 
 export function getStoredApiKey(): string {
-  return localStorage.getItem(API_KEY_STORAGE) || '';
+  // Environment variable takes priority, then localStorage
+  return import.meta.env.VITE_GOOGLE_MAPS_API_KEY || localStorage.getItem(API_KEY_STORAGE) || '';
 }
