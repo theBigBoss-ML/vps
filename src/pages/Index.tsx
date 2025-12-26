@@ -30,7 +30,7 @@ const Index = () => {
   const getApiKey = (): string => {
     // Force re-read when apiKeyVersion changes
     void apiKeyVersion;
-    return getStoredApiKey() || import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+    return getStoredApiKey();
   };
 
   const handleDetectLocation = useCallback(async () => {
