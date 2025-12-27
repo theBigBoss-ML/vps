@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
-import { Copy, Check, Share2, MapPin, Database, RefreshCw, Info, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Copy, Check, Share2, MapPin, Database, RefreshCw, Info, ThumbsUp, ThumbsDown, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LocationResult } from '@/types/location';
 import { toast } from 'sonner';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import {
   Accordion,
   AccordionContent,
@@ -20,9 +22,16 @@ interface PostalCodeDisplayProps {
 export function PostalCodeDisplay({ result, onReset, onCopy, onFeedback }: PostalCodeDisplayProps) {
   const [copied, setCopied] = useState(false);
   const [feedbackGiven, setFeedbackGiven] = useState<'like' | 'dislike' | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<L.Map | null>(null);
 
   // Get the area name for display - prioritize area, then LGA, then state
   const areaName = result.area || result.lga || result.state || 'your';
+
+  // Check if we have valid coordinates
+  const hasValidCoordinates = result.coordinates && 
+    result.coordinates.lat !== 0 && 
+    result.coordinates.lng !== 0;
 
   useEffect(() => {
     if (copied) {
@@ -30,6 +39,50 @@ export function PostalCodeDisplay({ result, onReset, onCopy, onFeedback }: Posta
       return () => clearTimeout(timer);
     }
   }, [copied]);
+
+  // Initialize mini map
+  useEffect(() => {
+    if (!mapContainerRef.current || !hasValidCoordinates || mapRef.current) return;
+
+    const map = L.map(mapContainerRef.current, {
+      center: [result.coordinates.lat, result.coordinates.lng],
+      zoom: 15,
+      zoomControl: false,
+      attributionControl: false,
+      dragging: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      touchZoom: false,
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Custom marker icon
+    const customIcon = L.divIcon({
+      className: 'custom-location-marker',
+      html: `
+        <div class="location-marker-container">
+          <div class="location-marker-dot"></div>
+          <div class="location-marker-pulse"></div>
+        </div>
+      `,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
+    });
+
+    L.marker([result.coordinates.lat, result.coordinates.lng], { icon: customIcon }).addTo(map);
+
+    mapRef.current = map;
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, [hasValidCoordinates, result.coordinates]);
 
   const handleCopy = async () => {
     try {
@@ -77,13 +130,13 @@ export function PostalCodeDisplay({ result, onReset, onCopy, onFeedback }: Posta
   return (
     <div className="animate-fade-in space-y-6">
       {/* Main Postal Code Display */}
-      <div className="text-center p-6 md:p-8 rounded-2xl bg-gradient-to-br from-nigeria-green/20 to-nigeria-green/5 border border-nigeria-green/30">
+      <div className="text-center p-6 md:p-8 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30">
         <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
           Your Area's Postal Code
         </p>
         <div className="flex items-center justify-center gap-4">
           <span 
-            className="text-4xl sm:text-5xl md:text-6xl font-bold text-nigeria-green tracking-wider mono"
+            className="text-4xl sm:text-5xl md:text-6xl font-bold text-primary tracking-wider mono"
             aria-label={`Postal code: ${result.postalCode.split('').join(' ')}`}
           >
             {result.postalCode}
@@ -92,11 +145,11 @@ export function PostalCodeDisplay({ result, onReset, onCopy, onFeedback }: Posta
             variant="outline"
             size="icon"
             onClick={handleCopy}
-            className="h-10 w-10 md:h-12 md:w-12 border-nigeria-green/50 hover:bg-nigeria-green/10"
+            className="h-10 w-10 md:h-12 md:w-12 border-primary/50 hover:bg-primary/10"
             aria-label={copied ? 'Copied!' : 'Copy postal code'}
           >
             {copied ? (
-              <Check className="h-4 w-4 md:h-5 md:w-5 text-nigeria-green" />
+              <Check className="h-4 w-4 md:h-5 md:w-5 text-primary" />
             ) : (
               <Copy className="h-4 w-4 md:h-5 md:w-5" />
             )}
@@ -112,19 +165,19 @@ export function PostalCodeDisplay({ result, onReset, onCopy, onFeedback }: Posta
         <div className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground">
           {result.source === 'google' ? (
             <>
-              <MapPin className="h-3.5 w-3.5 text-nigeria-green" aria-hidden="true" />
+              <MapPin className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
               <span>Verified by Google Maps</span>
             </>
           ) : (
             <>
-              <Database className="h-3.5 w-3.5 text-nigeria-orange" aria-hidden="true" />
+              <Database className="h-3.5 w-3.5 text-warning" aria-hidden="true" />
               <span>Matched from database ({Math.round(result.confidence)}% confidence)</span>
             </>
           )}
         </div>
 
         {/* Feedback buttons */}
-        <div className="mt-4 pt-4 border-t border-nigeria-green/20">
+        <div className="mt-4 pt-4 border-t border-primary/20">
           <p className="text-xs text-muted-foreground mb-3">Was this result accurate?</p>
           <div className="flex items-center justify-center gap-3">
             <Button
@@ -132,9 +185,9 @@ export function PostalCodeDisplay({ result, onReset, onCopy, onFeedback }: Posta
               size="sm"
               onClick={() => handleFeedback('like')}
               disabled={feedbackGiven !== null}
-              className={`gap-2 ${feedbackGiven === 'like' ? 'bg-nigeria-green/20 border-nigeria-green text-nigeria-green' : ''}`}
+              className={`gap-2 ${feedbackGiven === 'like' ? 'bg-primary/20 border-primary text-primary' : ''}`}
             >
-              <ThumbsUp className={`h-4 w-4 ${feedbackGiven === 'like' ? 'fill-nigeria-green' : ''}`} />
+              <ThumbsUp className={`h-4 w-4 ${feedbackGiven === 'like' ? 'fill-primary' : ''}`} />
               Yes
             </Button>
             <Button
@@ -156,7 +209,7 @@ export function PostalCodeDisplay({ result, onReset, onCopy, onFeedback }: Posta
         <AccordionItem value="how-it-works" className="border border-border rounded-xl px-4 bg-card">
           <AccordionTrigger className="hover:no-underline py-3">
             <div className="flex items-center gap-2 text-sm font-medium">
-              <Info className="h-4 w-4 text-nigeria-green" aria-hidden="true" />
+              <Info className="h-4 w-4 text-primary" aria-hidden="true" />
               <span>How Nigerian Postal Codes Work</span>
             </div>
           </AccordionTrigger>
@@ -202,13 +255,13 @@ export function PostalCodeDisplay({ result, onReset, onCopy, onFeedback }: Posta
           )}
           
           {/* Coverage info */}
-          <div className="mt-3 p-3 rounded-lg bg-gradient-to-r from-nigeria-green/10 to-nigeria-green/5 border border-nigeria-green/20">
+          <div className="mt-3 p-3 rounded-lg bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20">
             <div className="flex items-start gap-2.5">
-              <div className="p-1.5 rounded-md bg-nigeria-green/20 shrink-0">
-                <MapPin className="h-3.5 w-3.5 text-nigeria-green" aria-hidden="true" />
+              <div className="p-1.5 rounded-md bg-primary/20 shrink-0">
+                <MapPin className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-nigeria-green mb-0.5">Coverage Area</p>
+                <p className="text-xs font-semibold text-primary mb-0.5">Coverage Area</p>
                 <p className="text-xs text-foreground/80 leading-relaxed">
                   This postal code serves the entire <span className="font-medium text-foreground">{areaName}</span> neighborhood and surrounding streets.
                 </p>
@@ -216,17 +269,41 @@ export function PostalCodeDisplay({ result, onReset, onCopy, onFeedback }: Posta
             </div>
           </div>
           
-          {/* Nearest address */}
-          <div className="mt-3 p-3 rounded-lg bg-gradient-to-r from-nigeria-orange/10 to-nigeria-orange/5 border border-nigeria-orange/20">
+          {/* Nearest address with Mini Map */}
+          <div className="mt-3 p-3 rounded-lg bg-gradient-to-r from-warning/10 to-warning/5 border border-warning/20">
             <div className="flex items-start gap-2.5">
-              <div className="p-1.5 rounded-md bg-nigeria-orange/20 shrink-0">
-                <MapPin className="h-3.5 w-3.5 text-nigeria-orange" aria-hidden="true" />
+              <div className="p-1.5 rounded-md bg-warning/20 shrink-0">
+                <Navigation className="h-3.5 w-3.5 text-warning" aria-hidden="true" />
               </div>
-              <div>
-                <p className="text-xs font-semibold text-nigeria-orange mb-0.5">Nearest Address to Your Location</p>
-                <p className="text-xs text-foreground/80 leading-relaxed">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-warning mb-1">Nearest Address to Your Location</p>
+                <p className="text-xs text-foreground/80 leading-relaxed mb-3">
                   {result.address}
                 </p>
+                
+                {/* Mini Map */}
+                {hasValidCoordinates && (
+                  <div className="relative">
+                    <div 
+                      ref={mapContainerRef} 
+                      className="w-full h-32 rounded-lg overflow-hidden border border-border"
+                      style={{ minHeight: '128px' }}
+                    />
+                    <div className="absolute bottom-1 right-1 bg-background/80 backdrop-blur-sm px-1.5 py-0.5 rounded text-[10px] text-muted-foreground">
+                      © OpenStreetMap
+                    </div>
+                  </div>
+                )}
+                
+                {/* Coordinates display */}
+                {hasValidCoordinates && (
+                  <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground">
+                    <MapPin className="h-3 w-3" />
+                    <span className="font-mono">
+                      {result.coordinates.lat.toFixed(5)}, {result.coordinates.lng.toFixed(5)}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -254,6 +331,57 @@ export function PostalCodeDisplay({ result, onReset, onCopy, onFeedback }: Posta
           Search Again
         </Button>
       </div>
+
+      {/* Custom marker styles */}
+      <style>{`
+        .custom-location-marker {
+          background: transparent;
+          border: none;
+        }
+        
+        .location-marker-container {
+          position: relative;
+          width: 24px;
+          height: 24px;
+        }
+        
+        .location-marker-dot {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 12px;
+          height: 12px;
+          background: hsl(152, 69%, 31%);
+          border: 2px solid white;
+          border-radius: 50%;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          z-index: 2;
+        }
+        
+        .location-marker-pulse {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 24px;
+          height: 24px;
+          background: hsl(152, 69%, 31%, 0.3);
+          border-radius: 50%;
+          animation: pulse-ring 2s ease-out infinite;
+        }
+        
+        @keyframes pulse-ring {
+          0% {
+            transform: translate(-50%, -50%) scale(0.5);
+            opacity: 1;
+          }
+          100% {
+            transform: translate(-50%, -50%) scale(1.5);
+            opacity: 0;
+          }
+        }
+      `}</style>
     </div>
   );
 }
