@@ -202,21 +202,33 @@ export function PostalCodeDisplay({ result, onReset, onCopy, onFeedback }: Posta
           )}
           
           {/* Coverage info */}
-          <div className="pt-2 mt-2 border-t border-border">
-            <div className="flex items-start gap-2">
-              <Info className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" aria-hidden="true" />
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                <span className="font-medium">Coverage:</span> This Nigeria zip postal code serves the entire {areaName} neighborhood and surrounding streets.
-              </p>
+          <div className="mt-3 p-3 rounded-lg bg-gradient-to-r from-nigeria-green/10 to-nigeria-green/5 border border-nigeria-green/20">
+            <div className="flex items-start gap-2.5">
+              <div className="p-1.5 rounded-md bg-nigeria-green/20 shrink-0">
+                <MapPin className="h-3.5 w-3.5 text-nigeria-green" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-nigeria-green mb-0.5">Coverage Area</p>
+                <p className="text-xs text-foreground/80 leading-relaxed">
+                  This postal code serves the entire <span className="font-medium text-foreground">{areaName}</span> neighborhood and surrounding streets.
+                </p>
+              </div>
             </div>
           </div>
           
           {/* Nearest address */}
-          <div className="pt-2 border-t border-border">
-            <p className="text-xs text-muted-foreground mb-1 font-medium">Nearest Address to Your Location:</p>
-            <p className="text-muted-foreground text-xs leading-relaxed">
-              {result.address}
-            </p>
+          <div className="mt-3 p-3 rounded-lg bg-gradient-to-r from-nigeria-orange/10 to-nigeria-orange/5 border border-nigeria-orange/20">
+            <div className="flex items-start gap-2.5">
+              <div className="p-1.5 rounded-md bg-nigeria-orange/20 shrink-0">
+                <MapPin className="h-3.5 w-3.5 text-nigeria-orange" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-nigeria-orange mb-0.5">Nearest Address to Your Location</p>
+                <p className="text-xs text-foreground/80 leading-relaxed">
+                  {result.address}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
