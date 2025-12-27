@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Map, Download, ZoomIn, ZoomOut, RotateCcw, Loader2, Info, Navigation } from 'lucide-react';
+import { MapPin, Map, Download, ZoomIn, ZoomOut, RotateCcw, Loader2, Info, Navigation, Search, Check, ChevronsUpDown } from 'lucide-react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ThemeToggle } from '@/components/finder/ThemeToggle';
 import { useTheme } from '@/hooks/useTheme';
 import { toast } from 'sonner';
-
+import { cn } from '@/lib/utils';
 const stateMapData = [
   { id: 'abia', name: 'Abia', mapUrl: 'https://web.archive.org/web/20090519191323im_/http://www.nipost.gov.ng/images/maps/Abia.jpg' },
   { id: 'adamawa', name: 'Adamawa', mapUrl: 'https://web.archive.org/web/20090519191323im_/http://www.nipost.gov.ng/images/maps/Adamawa.jpg' },
@@ -55,12 +56,18 @@ const StateMaps = () => {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [isLoadingMap, setIsLoadingMap] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [open, setOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
   const handleStateChange = (value: string) => {
     setSelectedState(value);
+    const state = stateMapData.find(s => s.id === value);
+    if (state) {
+      setSelectedStateName(state.name);
+    }
     setMapLoaded(false);
     setImageError(false);
+    setOpen(false);
   };
 
   const loadMap = () => {
@@ -193,18 +200,46 @@ const StateMaps = () => {
             <label className="text-sm font-medium text-foreground whitespace-nowrap">
               Select State:
             </label>
-            <Select value={selectedState} onValueChange={handleStateChange}>
-              <SelectTrigger className="w-full sm:w-[280px]">
-                <SelectValue placeholder="-- Choose a State --" />
-              </SelectTrigger>
-              <SelectContent className="max-h-[300px] bg-popover border border-border z-50">
-                {stateMapData.map(state => (
-                  <SelectItem key={state.id} value={state.id}>
-                    {state.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={open}
+                  className="w-full sm:w-[280px] justify-between"
+                >
+                  {selectedState
+                    ? stateMapData.find((state) => state.id === selectedState)?.name
+                    : "-- Choose a State --"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full sm:w-[280px] p-0 bg-popover border border-border z-50" align="start">
+                <Command>
+                  <CommandInput placeholder="Search state..." className="h-9" />
+                  <CommandList>
+                    <CommandEmpty>No state found.</CommandEmpty>
+                    <CommandGroup>
+                      {stateMapData.map((state) => (
+                        <CommandItem
+                          key={state.id}
+                          value={state.name}
+                          onSelect={() => handleStateChange(state.id)}
+                        >
+                          {state.name}
+                          <Check
+                            className={cn(
+                              "ml-auto h-4 w-4",
+                              selectedState === state.id ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
           <Button 
             onClick={loadMap}
