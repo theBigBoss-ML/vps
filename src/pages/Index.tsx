@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
-import { MapPin, Search, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { MapPin, Search, Sparkles, BookOpen } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LocationButton } from '@/components/finder/LocationButton';
 import { PostalCodeDisplay } from '@/components/finder/PostalCodeDisplay';
@@ -138,6 +139,13 @@ const Index = () => {
             </div>
           </div>
           <div className="flex items-center gap-1">
+            <Link 
+              to="/blog" 
+              className="flex items-center gap-1.5 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50"
+            >
+              <BookOpen className="h-4 w-4" />
+              <span className="hidden sm:inline">Blog</span>
+            </Link>
             <ApiKeySettings onKeyUpdate={() => setApiKeyVersion(v => v + 1)} />
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
           </div>
@@ -201,9 +209,16 @@ const Index = () => {
       </main>
 
       <footer className="border-t border-border/50 py-6 mt-auto">
-        <div className="container mx-auto px-4 text-center space-y-2">
+        <div className="container mx-auto px-4 text-center space-y-3">
           <p className="text-sm font-medium text-foreground">AI-based Nigeria Zip Postal Code Finder</p>
           <p className="text-xs text-muted-foreground">Free & Fast Nigeria Zip Postal Code Lookup</p>
+          <Link 
+            to="/blog" 
+            className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
+          >
+            <BookOpen className="h-3 w-3" />
+            Read our blog for postal service guides
+          </Link>
         </div>
       </footer>
     </div>
