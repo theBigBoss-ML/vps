@@ -1,22 +1,23 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Search, Sparkles } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LocationButton } from '@/components/finder/LocationButton';
 import { PostalCodeDisplay } from '@/components/finder/PostalCodeDisplay';
-
 import { SmartSearch } from '@/components/finder/SmartSearch';
 import { RecentLocations } from '@/components/finder/RecentLocations';
 import { ErrorMessage } from '@/components/finder/ErrorMessage';
 import { LoadingState } from '@/components/finder/LoadingState';
 import { ThemeToggle } from '@/components/finder/ThemeToggle';
 import { ApiKeySettings, getStoredApiKey } from '@/components/finder/ApiKeySettings';
+import { UsageStatsDisplay } from '@/components/finder/UsageStatsDisplay';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useRecentLocations } from '@/hooks/useRecentLocations';
 import { useTheme } from '@/hooks/useTheme';
+import { useUsageStats } from '@/hooks/useUsageStats';
 import { LocationResult, LookupStatus, RecentLocation } from '@/types/location';
 import { rateLimitedGetPostalCode } from '@/lib/postalCodeService';
-import { defaultPostalCodes, PostalCode } from '@/data/postalCodes';
+import { PostalCode } from '@/data/postalCodes';
 import { toast } from 'sonner';
 
 const Index = () => {
@@ -28,6 +29,7 @@ const Index = () => {
   const { getCurrentPosition, error: geoError, clearError } = useGeolocation();
   const { recentLocations, addRecentLocation, clearRecentLocations } = useRecentLocations();
   const { theme, toggleTheme } = useTheme();
+  const { stats, loading: statsLoading, trackStat } = useUsageStats();
 
   const getApiKey = (): string => {
     // Force re-read when apiKeyVersion changes
@@ -67,12 +69,13 @@ const Index = () => {
         area: locationResult.area,
         lga: locationResult.lga,
       });
+      trackStat('generation', locationResult.postalCode);
       toast.success('Postal code found!');
     } else {
       setStatus('error');
       setError('Could not find postal code for your location. Try manual search.');
     }
-  }, [getCurrentPosition, geoError, addRecentLocation]);
+  }, [getCurrentPosition, geoError, addRecentLocation, trackStat]);
 
   const handleSmartSearch = useCallback((result: PostalCode) => {
     const locationResult: LocationResult = {
@@ -94,8 +97,9 @@ const Index = () => {
       area: result.area,
       lga: result.lga,
     });
+    trackStat('generation', result.postalCode);
     toast.success('Nigeria zip postal code found!');
-  }, [addRecentLocation]);
+  }, [addRecentLocation, trackStat]);
 
   const handleSelectRecent = useCallback((location: RecentLocation) => {
     setResult({
@@ -119,6 +123,18 @@ const Index = () => {
     clearError();
   }, [clearError]);
 
+  const handleCopy = useCallback(() => {
+    if (result) {
+      trackStat('copy', result.postalCode);
+    }
+  }, [result, trackStat]);
+
+  const handleFeedback = useCallback((type: 'like' | 'dislike') => {
+    if (result) {
+      trackStat(type, result.postalCode);
+    }
+  }, [result, trackStat]);
+
   const isLoading = status === 'detecting' || status === 'geocoding';
 
   return (
@@ -129,7 +145,7 @@ const Index = () => {
 
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-xl sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="p-2 bg-nigeria-green/20 rounded-xl">
               <MapPin className="h-6 w-6 text-nigeria-green" aria-hidden="true" />
             </div>
@@ -137,7 +153,7 @@ const Index = () => {
               <h1 className="text-lg font-bold text-foreground">AI-based Nigeria Zip Postal Code Finder</h1>
               <p className="text-xs text-muted-foreground hidden sm:block">Free & fast Nigeria zip postal code lookup</p>
             </div>
-          </div>
+          </Link>
           <nav className="flex items-center gap-4">
             <Link 
               to="/blog" 
@@ -153,7 +169,12 @@ const Index = () => {
 
       <main id="main-content" className="flex-1 container mx-auto px-4 py-8 max-w-lg">
         {status === 'success' && result ? (
-          <PostalCodeDisplay result={result} onReset={handleReset} />
+          <PostalCodeDisplay 
+            result={result} 
+            onReset={handleReset} 
+            onCopy={handleCopy}
+            onFeedback={handleFeedback}
+          />
         ) : isLoading ? (
           <LoadingState status={status} />
         ) : (
@@ -207,20 +228,31 @@ const Index = () => {
         )}
       </main>
 
-      <footer className="border-t border-border/50 py-12 mt-auto bg-card/30">
+      {/* Usage Stats Section */}
+      <UsageStatsDisplay 
+        generations={stats.generations}
+        likes={stats.likes}
+        copies={stats.copies}
+        loading={statsLoading}
+      />
+
+      <footer className="border-t border-border/50 py-8 md:py-12 bg-card/30">
         <div className="container mx-auto px-4 max-w-6xl">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-            <div className="sm:col-span-2 lg:col-span-1">
-              <div className="flex items-center gap-2 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* Brand */}
+            <div className="col-span-1 sm:col-span-2 lg:col-span-1">
+              <Link to="/" className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
                 <div className="p-1.5 bg-nigeria-green/20 rounded-lg">
                   <MapPin className="h-4 w-4 text-nigeria-green" />
                 </div>
                 <h3 className="text-sm font-bold text-foreground">AI-based Nigeria Zip Postal Code Finder</h3>
-              </div>
+              </Link>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Free & fast Nigeria zip postal code lookup using GPS or smart search.
               </p>
             </div>
+
+            {/* Quick Links */}
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-4">Quick Links</h4>
               <nav className="flex flex-col gap-3">
@@ -228,12 +260,16 @@ const Index = () => {
                 <Link to="/blog" className="text-sm text-muted-foreground hover:text-nigeria-green transition-colors">Blog</Link>
               </nav>
             </div>
+
+            {/* Resources */}
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-4">Resources</h4>
               <nav className="flex flex-col gap-3">
                 <Link to="/blog/nipost-services-guide" className="text-sm text-muted-foreground hover:text-nigeria-green transition-colors">NIPOST Guide</Link>
               </nav>
             </div>
+
+            {/* About */}
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-4">About</h4>
               <p className="text-sm text-muted-foreground leading-relaxed">
@@ -241,12 +277,11 @@ const Index = () => {
               </p>
             </div>
           </div>
-          <div className="border-t border-border/50 mt-8 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">
+
+          {/* Copyright */}
+          <div className="border-t border-border/50 mt-8 pt-6">
+            <p className="text-sm text-muted-foreground text-center sm:text-left">
               © {new Date().getFullYear()} AI-based Nigeria Zip Postal Code Finder. All rights reserved.
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Made with ❤️ for Nigeria
             </p>
           </div>
         </div>

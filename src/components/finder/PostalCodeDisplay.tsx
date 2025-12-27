@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Copy, Check, Share2, MapPin, Database, RefreshCw, Info } from 'lucide-react';
+import { Copy, Check, Share2, MapPin, Database, RefreshCw, Info, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LocationResult } from '@/types/location';
 import { toast } from 'sonner';
@@ -13,10 +13,13 @@ import {
 interface PostalCodeDisplayProps {
   result: LocationResult;
   onReset: () => void;
+  onCopy?: () => void;
+  onFeedback?: (type: 'like' | 'dislike') => void;
 }
 
-export function PostalCodeDisplay({ result, onReset }: PostalCodeDisplayProps) {
+export function PostalCodeDisplay({ result, onReset, onCopy, onFeedback }: PostalCodeDisplayProps) {
   const [copied, setCopied] = useState(false);
+  const [feedbackGiven, setFeedbackGiven] = useState<'like' | 'dislike' | null>(null);
 
   // Get the area name for display - prioritize area, then LGA, then state
   const areaName = result.area || result.lga || result.state || 'your';
@@ -33,9 +36,17 @@ export function PostalCodeDisplay({ result, onReset }: PostalCodeDisplayProps) {
       await navigator.clipboard.writeText(result.postalCode);
       setCopied(true);
       toast.success('Postal code copied to clipboard!');
+      onCopy?.();
     } catch {
       toast.error('Failed to copy to clipboard');
     }
+  };
+
+  const handleFeedback = (type: 'like' | 'dislike') => {
+    if (feedbackGiven) return;
+    setFeedbackGiven(type);
+    onFeedback?.(type);
+    toast.success(type === 'like' ? 'Thanks for your feedback!' : 'Thanks! We\'ll work to improve accuracy.');
   };
 
   const handleShare = async () => {
@@ -111,6 +122,33 @@ export function PostalCodeDisplay({ result, onReset }: PostalCodeDisplayProps) {
             </>
           )}
         </div>
+
+        {/* Feedback buttons */}
+        <div className="mt-4 pt-4 border-t border-nigeria-green/20">
+          <p className="text-xs text-muted-foreground mb-3">Was this result accurate?</p>
+          <div className="flex items-center justify-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleFeedback('like')}
+              disabled={feedbackGiven !== null}
+              className={`gap-2 ${feedbackGiven === 'like' ? 'bg-nigeria-green/20 border-nigeria-green text-nigeria-green' : ''}`}
+            >
+              <ThumbsUp className={`h-4 w-4 ${feedbackGiven === 'like' ? 'fill-nigeria-green' : ''}`} />
+              Yes
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleFeedback('dislike')}
+              disabled={feedbackGiven !== null}
+              className={`gap-2 ${feedbackGiven === 'dislike' ? 'bg-destructive/20 border-destructive text-destructive' : ''}`}
+            >
+              <ThumbsDown className={`h-4 w-4 ${feedbackGiven === 'dislike' ? 'fill-destructive' : ''}`} />
+              No
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Educational Info Section - Collapsible */}
@@ -163,7 +201,7 @@ export function PostalCodeDisplay({ result, onReset }: PostalCodeDisplayProps) {
             </div>
           )}
           
-          {/* Coverage info - New field */}
+          {/* Coverage info */}
           <div className="pt-2 mt-2 border-t border-border">
             <div className="flex items-start gap-2">
               <Info className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" aria-hidden="true" />
@@ -173,7 +211,9 @@ export function PostalCodeDisplay({ result, onReset }: PostalCodeDisplayProps) {
             </div>
           </div>
           
+          {/* Nearest address */}
           <div className="pt-2 border-t border-border">
+            <p className="text-xs text-muted-foreground mb-1 font-medium">Nearest Address to Your Location:</p>
             <p className="text-muted-foreground text-xs leading-relaxed">
               {result.address}
             </p>
