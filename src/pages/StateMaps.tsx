@@ -384,13 +384,24 @@ const StateMaps = () => {
                       </Button>
                     </div>
                     
-                    {/* Map Image */}
-                    <div className="flex items-center justify-center min-h-[400px] max-h-[700px] overflow-hidden">
-                      <TransformComponent>
+                    {/* Map Image - Full size display */}
+                    <div className="flex items-center justify-center min-h-[400px] overflow-auto bg-muted/20">
+                      <TransformComponent
+                        wrapperStyle={{
+                          width: '100%',
+                          height: 'auto',
+                        }}
+                        contentStyle={{
+                          width: '100%',
+                          display: 'flex',
+                          justifyContent: 'center',
+                        }}
+                      >
                         <img 
                           src={stateMapUrl} 
                           alt={`${selectedStateName} State Postal Code Map`}
-                          className="max-w-full h-auto"
+                          className="w-full h-auto"
+                          style={{ maxWidth: 'none' }}
                           onLoad={handleImageLoad}
                           onError={handleImageError}
                         />
