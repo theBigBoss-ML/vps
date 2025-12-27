@@ -1,9 +1,10 @@
 import { useState, useCallback } from 'react';
-import { MapPin, Search } from 'lucide-react';
+import { MapPin, Search, Sparkles } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LocationButton } from '@/components/finder/LocationButton';
 import { PostalCodeDisplay } from '@/components/finder/PostalCodeDisplay';
 import { ManualSearch } from '@/components/finder/ManualSearch';
+import { SmartSearch } from '@/components/finder/SmartSearch';
 import { RecentLocations } from '@/components/finder/RecentLocations';
 import { ErrorMessage } from '@/components/finder/ErrorMessage';
 import { LoadingState } from '@/components/finder/LoadingState';
@@ -14,7 +15,7 @@ import { useRecentLocations } from '@/hooks/useRecentLocations';
 import { useTheme } from '@/hooks/useTheme';
 import { LocationResult, LookupStatus, RecentLocation } from '@/types/location';
 import { rateLimitedGetPostalCode } from '@/lib/postalCodeService';
-import { defaultPostalCodes } from '@/data/postalCodes';
+import { defaultPostalCodes, PostalCode } from '@/data/postalCodes';
 import { toast } from 'sonner';
 
 const Index = () => {
@@ -109,6 +110,29 @@ const Index = () => {
     }
   }, [addRecentLocation]);
 
+  const handleSmartSearch = useCallback((result: PostalCode) => {
+    const locationResult: LocationResult = {
+      postalCode: result.postalCode,
+      source: 'database',
+      address: `${result.locality}, ${result.area}, ${result.lga}, ${result.state}`,
+      lga: result.lga,
+      area: result.area,
+      state: result.state,
+      confidence: 90,
+      coordinates: { lat: 0, lng: 0 },
+      timestamp: new Date(),
+    };
+    setResult(locationResult);
+    setStatus('success');
+    addRecentLocation({
+      postalCode: result.postalCode,
+      address: locationResult.address,
+      area: result.area,
+      lga: result.lga,
+    });
+    toast.success('Nigeria zip postal code found!');
+  }, [addRecentLocation]);
+
   const handleSelectRecent = useCallback((location: RecentLocation) => {
     setResult({
       postalCode: location.postalCode,
@@ -146,8 +170,8 @@ const Index = () => {
               <MapPin className="h-6 w-6 text-nigeria-green" aria-hidden="true" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-foreground">PostCode NG</h1>
-              <p className="text-xs text-muted-foreground hidden sm:block">Find your Nigerian postal code</p>
+              <h1 className="text-lg font-bold text-foreground">Nigeria Zip Code</h1>
+              <p className="text-xs text-muted-foreground hidden sm:block">AI-based Nigeria zip postal code finder</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
@@ -164,13 +188,33 @@ const Index = () => {
           <LoadingState status={status} />
         ) : (
           <div className="space-y-8">
-            <div className="text-center space-y-2">
+            <div className="text-center space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-nigeria-green/10 text-nigeria-green text-xs font-medium rounded-full">
+                <Sparkles className="h-3 w-3" />
+                AI-Powered
+              </div>
               <h2 className="text-2xl font-bold text-foreground">
-                Find Your Postal Code
+                Find Your Nigeria Zip Postal Code
               </h2>
-              <p className="text-muted-foreground">
-                Instantly find your Nigerian postal code using GPS or manual search
+              <p className="text-muted-foreground text-sm">
+                AI-based Nigeria zip postal code finder — instant lookup using GPS or smart search
               </p>
+            </div>
+
+            {/* Smart Search - Primary Option */}
+            <div className="space-y-4">
+              <SmartSearch onSelect={handleSmartSearch} isLoading={isLoading} />
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-3 text-muted-foreground">
+                  Or use other methods
+                </span>
+              </div>
             </div>
 
             {(error || geoError) && (
@@ -210,8 +254,9 @@ const Index = () => {
       </main>
 
       <footer className="border-t border-border/50 py-6 mt-auto">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>Nigerian Postal Code Finder • Free & Fast</p>
+        <div className="container mx-auto px-4 text-center space-y-2">
+          <p className="text-sm font-medium text-foreground">AI-based Nigeria Zip Postal Code Finder</p>
+          <p className="text-xs text-muted-foreground">Free & Fast Nigeria Zip Postal Code Lookup</p>
         </div>
       </footer>
     </div>
