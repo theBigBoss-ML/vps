@@ -268,16 +268,22 @@ const Index = () => {
               </TabsContent>
 
               <TabsContent value="manual" className="space-y-6">
-                <ManualSearch onSearch={handleManualSearch} isLoading={isLoading} />
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Search className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium text-foreground">Search by Location Name</span>
+                  </div>
+                  <SmartSearch onSelect={handleSmartSearch} isLoading={isLoading} />
+                </div>
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
                     <span className="w-full border-t border-border" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">or search by name</span>
+                    <span className="bg-background px-2 text-muted-foreground">or select from dropdown</span>
                   </div>
                 </div>
-                <SmartSearch onSelect={handleSmartSearch} isLoading={isLoading} />
+                <ManualSearch onSearch={handleManualSearch} isLoading={isLoading} />
               </TabsContent>
             </Tabs>
           </div>
