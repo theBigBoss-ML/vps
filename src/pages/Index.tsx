@@ -26,7 +26,7 @@ const Index = () => {
   const [error, setError] = useState<string | null>(null);
   
   const [apiKeyVersion, setApiKeyVersion] = useState(0);
-  const { getCurrentPosition, error: geoError, clearError } = useGeolocation();
+  const { getCurrentPosition, error: geoError, clearError, accuracy, accuracyLevel } = useGeolocation();
   const { recentLocations, addRecentLocation, clearRecentLocations } = useRecentLocations();
   const { theme, toggleTheme } = useTheme();
   const { stats, loading: statsLoading, trackStat } = useUsageStats();
@@ -212,7 +212,12 @@ const Index = () => {
               </TabsList>
 
               <TabsContent value="gps" className="space-y-6">
-                <LocationButton onDetect={handleDetectLocation} isLoading={isLoading} />
+                <LocationButton 
+                  onDetect={handleDetectLocation} 
+                  isLoading={isLoading} 
+                  accuracy={accuracy}
+                  accuracyLevel={accuracyLevel}
+                />
                 <RecentLocations 
                   locations={recentLocations} 
                   onSelect={handleSelectRecent}

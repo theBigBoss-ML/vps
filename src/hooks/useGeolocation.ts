@@ -1,13 +1,15 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 interface GeolocationState {
   coordinates: { lat: number; lng: number } | null;
   error: string | null;
   isLoading: boolean;
+  accuracy: number | null;
+  accuracyLevel: 'high' | 'medium' | 'low' | null;
 }
 
 interface UseGeolocationReturn extends GeolocationState {
-  getCurrentPosition: () => Promise<{ lat: number; lng: number } | null>;
+  getCurrentPosition: (forceHighAccuracy?: boolean) => Promise<{ lat: number; lng: number } | null>;
   clearError: () => void;
 }
 
@@ -19,6 +21,13 @@ const NIGERIA_BOUNDS = {
   maxLng: 15.0,
 };
 
+// Accuracy thresholds in meters
+const ACCURACY_THRESHOLDS = {
+  HIGH: 50,      // < 50m = high accuracy (GPS)
+  MEDIUM: 200,   // < 200m = medium accuracy
+  // > 200m = low accuracy (IP-based or cell tower)
+};
+
 function isInNigeria(lat: number, lng: number): boolean {
   return (
     lat >= NIGERIA_BOUNDS.minLat &&
@@ -28,101 +37,175 @@ function isInNigeria(lat: number, lng: number): boolean {
   );
 }
 
+function getAccuracyLevel(accuracy: number): 'high' | 'medium' | 'low' {
+  if (accuracy <= ACCURACY_THRESHOLDS.HIGH) return 'high';
+  if (accuracy <= ACCURACY_THRESHOLDS.MEDIUM) return 'medium';
+  return 'low';
+}
+
 export function useGeolocation(): UseGeolocationReturn {
   const [state, setState] = useState<GeolocationState>({
     coordinates: null,
     error: null,
     isLoading: false,
+    accuracy: null,
+    accuracyLevel: null,
   });
+
+  const watchIdRef = useRef<number | null>(null);
 
   const clearError = useCallback(() => {
     setState(prev => ({ ...prev, error: null }));
   }, []);
 
-  // Helper to get position with specific options
-  const getPositionWithOptions = (options: PositionOptions): Promise<GeolocationPosition> => {
-    return new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject, options);
-    });
-  };
+  const stopWatching = useCallback(() => {
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+  }, []);
 
-  const getCurrentPosition = useCallback(async (): Promise<{ lat: number; lng: number } | null> => {
+  const getCurrentPosition = useCallback(async (forceHighAccuracy = true): Promise<{ lat: number; lng: number } | null> => {
     if (!navigator.geolocation) {
       setState({
         coordinates: null,
-        error: 'Geolocation is not supported by your browser',
+        error: 'Geolocation is not supported by your browser. Please use manual search.',
         isLoading: false,
+        accuracy: null,
+        accuracyLevel: null,
       });
       return null;
     }
 
     setState(prev => ({ ...prev, isLoading: true, error: null }));
+    stopWatching();
 
-    try {
-      let position: GeolocationPosition;
-
-      // Phase 1: Try high accuracy first (GPS) with shorter timeout
-      try {
-        position = await getPositionWithOptions({
-          enableHighAccuracy: true,
-          timeout: 10000, // 10 seconds for high accuracy
-          maximumAge: 60000, // Cache for 1 minute
-        });
-      } catch (highAccuracyError) {
-        // Phase 2: Fall back to low accuracy (faster, but less precise)
-        console.log('High accuracy failed, trying low accuracy...');
-        position = await getPositionWithOptions({
-          enableHighAccuracy: false,
-          timeout: 15000, // 15 seconds for low accuracy
-          maximumAge: 300000, // Cache for 5 minutes
-        });
-      }
-
-      const { latitude: lat, longitude: lng } = position.coords;
-
-      if (!isInNigeria(lat, lng)) {
-        setState({
-          coordinates: null,
-          error: 'Your location appears to be outside Nigeria. Please use manual search.',
-          isLoading: false,
-        });
-        return null;
-      }
-
-      // Log accuracy for debugging
-      console.log(`Location accuracy: ${position.coords.accuracy} meters`);
-
-      setState({
-        coordinates: { lat, lng },
-        error: null,
-        isLoading: false,
-      });
-      return { lat, lng };
-
-    } catch (error) {
-      const geoError = error as GeolocationPositionError;
-      let errorMessage = 'Unable to detect your location';
+    return new Promise((resolve) => {
+      let bestPosition: GeolocationPosition | null = null;
+      let resolved = false;
+      const startTime = Date.now();
       
-      switch (geoError.code) {
-        case geoError.PERMISSION_DENIED:
-          errorMessage = 'Location access denied. Please enable location permissions or use manual search.';
-          break;
-        case geoError.POSITION_UNAVAILABLE:
-          errorMessage = 'Location information unavailable. Please try again or use manual search.';
-          break;
-        case geoError.TIMEOUT:
-          errorMessage = 'Location request timed out. Please try again or use manual search.';
-          break;
-      }
+      // Timeout duration based on accuracy preference
+      const maxWaitTime = forceHighAccuracy ? 20000 : 15000; // 20s for high accuracy, 15s for normal
+      const targetAccuracy = forceHighAccuracy ? ACCURACY_THRESHOLDS.HIGH : ACCURACY_THRESHOLDS.MEDIUM;
 
-      setState({
-        coordinates: null,
-        error: errorMessage,
-        isLoading: false,
-      });
-      return null;
-    }
-  }, []);
+      const finalize = (position: GeolocationPosition | null, errorMsg?: string) => {
+        if (resolved) return;
+        resolved = true;
+        stopWatching();
+
+        if (!position) {
+          setState({
+            coordinates: null,
+            error: errorMsg || 'Unable to detect your location. Please try again or use manual search.',
+            isLoading: false,
+            accuracy: null,
+            accuracyLevel: null,
+          });
+          resolve(null);
+          return;
+        }
+
+        const { latitude: lat, longitude: lng, accuracy } = position.coords;
+
+        if (!isInNigeria(lat, lng)) {
+          setState({
+            coordinates: null,
+            error: 'Your location appears to be outside Nigeria. Please use manual search.',
+            isLoading: false,
+            accuracy: null,
+            accuracyLevel: null,
+          });
+          resolve(null);
+          return;
+        }
+
+        const accuracyLevel = getAccuracyLevel(accuracy);
+        console.log(`Final location - Accuracy: ${accuracy.toFixed(0)}m (${accuracyLevel}), Time: ${Date.now() - startTime}ms`);
+
+        setState({
+          coordinates: { lat, lng },
+          error: null,
+          isLoading: false,
+          accuracy,
+          accuracyLevel,
+        });
+        resolve({ lat, lng });
+      };
+
+      // Use watchPosition for progressive refinement
+      // This gets multiple readings and picks the best one
+      watchIdRef.current = navigator.geolocation.watchPosition(
+        (position) => {
+          const { accuracy } = position.coords;
+          console.log(`Location update - Accuracy: ${accuracy.toFixed(0)}m`);
+
+          // Keep the best position (lowest accuracy value = most precise)
+          if (!bestPosition || accuracy < bestPosition.coords.accuracy) {
+            bestPosition = position;
+          }
+
+          // If we've achieved target accuracy, finalize immediately
+          if (accuracy <= targetAccuracy) {
+            console.log(`Target accuracy (${targetAccuracy}m) achieved!`);
+            finalize(bestPosition);
+            return;
+          }
+
+          // Check if we've been trying long enough
+          const elapsed = Date.now() - startTime;
+          if (elapsed > maxWaitTime * 0.7 && bestPosition) {
+            // We've waited 70% of max time and have a reading, finalize
+            console.log('Time threshold reached, using best available position');
+            finalize(bestPosition);
+          }
+        },
+        (error) => {
+          console.error('Geolocation error:', error.code, error.message);
+          
+          // If we have any position, use it despite the error
+          if (bestPosition) {
+            console.log('Using best position despite error');
+            finalize(bestPosition);
+            return;
+          }
+
+          let errorMessage = 'Unable to detect your location';
+          
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage = 'Location access denied. Please enable location permissions in your browser settings, then try again.';
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage = 'Location unavailable. Please ensure GPS is enabled and try again, or use manual search.';
+              break;
+            case error.TIMEOUT:
+              errorMessage = 'Location request timed out. Please move to an area with better signal or use manual search.';
+              break;
+          }
+
+          finalize(null, errorMessage);
+        },
+        {
+          enableHighAccuracy: forceHighAccuracy,
+          timeout: maxWaitTime,
+          maximumAge: 0, // Always get fresh position
+        }
+      );
+
+      // Safety timeout - finalize with best available position
+      setTimeout(() => {
+        if (!resolved) {
+          console.log('Safety timeout reached');
+          if (bestPosition) {
+            finalize(bestPosition);
+          } else {
+            finalize(null, 'Location request timed out. Please try again or use manual search.');
+          }
+        }
+      }, maxWaitTime + 1000);
+    });
+  }, [stopWatching]);
 
   return {
     ...state,
