@@ -121,34 +121,23 @@ export function SmartSearch({ onSelect, isLoading }: SmartSearchProps) {
     setIsFetchingPlaces(true);
     try {
       const { data, error } = await supabase.functions.invoke('google-places', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        body: null,
+        body: { action: 'autocomplete', input },
       });
-
-      // Use query params approach via URL
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-places?action=autocomplete&input=${encodeURIComponent(input)}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-        }
-      );
       
-      if (!response.ok) {
+      if (error) {
+        console.error('Edge function error:', error);
         setUseGooglePlaces(false);
         setPredictions([]);
         return;
       }
       
-      const responseData = await response.json();
-      if (responseData.status === 'OK' && responseData.predictions) {
-        setPredictions(responseData.predictions.slice(0, 5));
+      if (data?.status === 'OK' && data?.predictions) {
+        setPredictions(data.predictions.slice(0, 5));
       } else {
         setPredictions([]);
       }
-    } catch {
+    } catch (err) {
+      console.error('Fetch error:', err);
       setUseGooglePlaces(false);
       setPredictions([]);
     } finally {
@@ -158,22 +147,20 @@ export function SmartSearch({ onSelect, isLoading }: SmartSearchProps) {
 
   const fetchPlaceDetails = useCallback(async (placeId: string): Promise<PlaceDetails | null> => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-places?action=details&place_id=${encodeURIComponent(placeId)}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-        }
-      );
+      const { data, error } = await supabase.functions.invoke('google-places', {
+        body: { action: 'details', place_id: placeId },
+      });
       
-      if (!response.ok) return null;
+      if (error) {
+        console.error('Edge function error:', error);
+        return null;
+      }
       
-      const data = await response.json();
-      if (data.status === 'OK' && data.result) {
+      if (data?.status === 'OK' && data?.result) {
         return data.result;
       }
-    } catch {
+    } catch (err) {
+      console.error('Fetch error:', err);
       return null;
     }
     return null;
