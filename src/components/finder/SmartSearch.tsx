@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { defaultPostalCodes, PostalCode } from '@/data/postalCodes';
 import { cn } from '@/lib/utils';
-import { getStoredApiKey } from './ApiKeySettings';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SmartSearchProps {
   onSelect: (result: PostalCode) => void;
@@ -113,34 +113,42 @@ export function SmartSearch({ onSelect, isLoading }: SmartSearchProps) {
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchPlacePredictions = useCallback(async (input: string) => {
-    const apiKey = getStoredApiKey();
-    if (!apiKey || input.length < 2) {
+    if (input.length < 2) {
       setPredictions([]);
       return;
     }
 
     setIsFetchingPlaces(true);
     try {
+      const { data, error } = await supabase.functions.invoke('google-places', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        body: null,
+      });
+
+      // Use query params approach via URL
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}&types=geocode&components=country:ng&key=${apiKey}`
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-places?action=autocomplete&input=${encodeURIComponent(input)}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+        }
       );
       
-      // CORS issue - Google Places API doesn't support client-side calls directly
-      // Fall back to local search
       if (!response.ok) {
         setUseGooglePlaces(false);
         setPredictions([]);
         return;
       }
       
-      const data = await response.json();
-      if (data.status === 'OK' && data.predictions) {
-        setPredictions(data.predictions.slice(0, 5));
+      const responseData = await response.json();
+      if (responseData.status === 'OK' && responseData.predictions) {
+        setPredictions(responseData.predictions.slice(0, 5));
       } else {
         setPredictions([]);
       }
     } catch {
-      // CORS or network error - use local search
       setUseGooglePlaces(false);
       setPredictions([]);
     } finally {
@@ -149,12 +157,14 @@ export function SmartSearch({ onSelect, isLoading }: SmartSearchProps) {
   }, []);
 
   const fetchPlaceDetails = useCallback(async (placeId: string): Promise<PlaceDetails | null> => {
-    const apiKey = getStoredApiKey();
-    if (!apiKey) return null;
-
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=address_components,formatted_address,geometry&key=${apiKey}`
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-places?action=details&place_id=${encodeURIComponent(placeId)}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+        }
       );
       
       if (!response.ok) return null;
