@@ -197,7 +197,7 @@ export function SmartSearch({ onSelect, isLoading }: SmartSearchProps) {
   return (
     <div ref={containerRef} className="relative w-full">
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
         <Input
           ref={inputRef}
           type="text"
@@ -205,8 +205,8 @@ export function SmartSearch({ onSelect, isLoading }: SmartSearchProps) {
           onChange={(e) => handleSearch(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => hasResults && setShowSuggestions(true)}
-          placeholder="Search location in Nigeria..."
-          className="pl-12 pr-10 h-14 text-base rounded-xl border-2 border-border focus:border-nigeria-green transition-colors"
+          placeholder="Type a location name e.g. Lekki, Ikeja..."
+          className="pl-12 pr-10 h-14 text-base rounded-xl border-2 border-primary/30 bg-primary/5 focus:border-primary focus:bg-background placeholder:text-muted-foreground/70 transition-all shadow-sm"
           disabled={isLoading}
           aria-label="Search for Nigeria zip postal code by location"
           aria-autocomplete="list"
