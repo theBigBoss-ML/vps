@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Map, Download, ZoomIn, ZoomOut, RotateCcw, Loader2, Info, Navigation, Search, Check, ChevronsUpDown } from 'lucide-react';
+import { MapPin, Map, Download, ZoomIn, ZoomOut, RotateCcw, Loader2, Info, Navigation, Check, ChevronsUpDown, ExternalLink } from 'lucide-react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -94,7 +94,11 @@ const StateMaps = () => {
   const handleImageError = () => {
     setIsLoadingMap(false);
     setImageError(true);
-    toast.error('Failed to load map. Please try again.');
+    toast.error('Map failed to load. Try opening in new tab.');
+  };
+
+  const openInNewTab = () => {
+    window.open(stateMapUrl, '_blank');
   };
 
   const downloadMap = async () => {
@@ -132,8 +136,8 @@ const StateMaps = () => {
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-xl sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="p-2 bg-nigeria-green/20 rounded-xl">
-              <MapPin className="h-6 w-6 text-nigeria-green" aria-hidden="true" />
+            <div className="p-2 bg-primary/20 rounded-xl">
+              <MapPin className="h-6 w-6 text-primary" aria-hidden="true" />
             </div>
             <div>
               <h1 className="text-lg font-bold text-foreground">AI-based Nigeria Zip Postal Code Finder</h1>
@@ -143,19 +147,19 @@ const StateMaps = () => {
           <nav className="flex items-center gap-4">
             <Link 
               to="/" 
-              className="text-sm text-muted-foreground hover:text-nigeria-green transition-colors"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               Home
             </Link>
             <Link 
               to="/state-maps" 
-              className="text-sm text-nigeria-green font-medium"
+              className="text-sm text-primary font-medium"
             >
               State Maps
             </Link>
             <Link 
               to="/blog" 
-              className="text-sm text-muted-foreground hover:text-nigeria-green transition-colors"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               Blog
             </Link>
@@ -168,9 +172,9 @@ const StateMaps = () => {
       <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
         {/* Page Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-nigeria-orange/10 text-nigeria-orange text-xs font-medium rounded-full mb-4">
-            <Map className="h-3 w-3" />
-            Official NIPOST Maps
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-accent/20 text-accent-foreground text-xs font-medium rounded-full mb-4 border border-primary/30">
+            <Map className="h-3 w-3 text-primary" />
+            <span className="text-primary font-semibold">Official NIPOST Maps</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
             State Postal Code Finder (by Map)
@@ -244,7 +248,7 @@ const StateMaps = () => {
           <Button 
             onClick={loadMap}
             disabled={!selectedState || isLoadingMap}
-            className="w-full sm:w-auto gap-2 bg-nigeria-green hover:bg-nigeria-green/90"
+            className="w-full sm:w-auto gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             {isLoadingMap ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -256,9 +260,9 @@ const StateMaps = () => {
         </div>
 
         {/* Instructions (shown before map loads) */}
-        {!mapLoaded && !isLoadingMap && (
-          <div className="p-6 rounded-xl bg-gradient-to-r from-nigeria-orange/10 to-nigeria-orange/5 border border-nigeria-orange/20">
-            <h3 className="text-lg font-semibold text-nigeria-orange mb-4">How to Use:</h3>
+        {!mapLoaded && !isLoadingMap && !stateMapUrl && (
+          <div className="p-6 rounded-xl bg-gradient-to-r from-secondary to-secondary/50 border border-border">
+            <h3 className="text-lg font-semibold text-primary mb-4">How to Use:</h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-sm text-foreground/80">
                 <span className="text-lg">📌</span>
@@ -289,20 +293,33 @@ const StateMaps = () => {
         )}
 
         {/* Loading State */}
-        {isLoadingMap && (
+        {isLoadingMap && !imageError && (
           <div className="flex flex-col items-center justify-center py-16 gap-4">
-            <Loader2 className="h-12 w-12 text-nigeria-green animate-spin" />
+            <Loader2 className="h-12 w-12 text-primary animate-spin" />
             <p className="text-muted-foreground">Loading {selectedStateName} postal code map...</p>
           </div>
         )}
 
         {/* Error State */}
         {imageError && (
-          <div className="p-6 rounded-xl bg-destructive/10 border border-destructive/20 text-center">
-            <p className="text-destructive font-medium mb-4">Failed to load the map image.</p>
-            <Button variant="outline" onClick={loadMap}>
-              Try Again
-            </Button>
+          <div className="p-6 rounded-xl bg-destructive/10 border border-destructive/20 text-center space-y-4">
+            <div className="flex flex-col items-center gap-2">
+              <Map className="h-10 w-10 text-destructive/60" />
+              <p className="text-destructive font-medium">Failed to load the map image.</p>
+              <p className="text-sm text-muted-foreground">
+                The archive server may be temporarily unavailable. Try opening in a new tab.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3 justify-center">
+              <Button variant="outline" onClick={loadMap}>
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Try Again
+              </Button>
+              <Button onClick={openInNewTab} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Open in New Tab
+              </Button>
+            </div>
           </div>
         )}
 
@@ -311,14 +328,14 @@ const StateMaps = () => {
           <div className={`space-y-6 ${isLoadingMap ? 'hidden' : ''}`}>
             {/* Map Title */}
             <div className="text-center">
-              <h3 className="text-xl md:text-2xl font-bold text-nigeria-green flex items-center justify-center gap-2">
+              <h3 className="text-xl md:text-2xl font-bold text-primary flex items-center justify-center gap-2">
                 <MapPin className="h-5 w-5" />
                 {selectedStateName} State Postal Code Map
               </h3>
             </div>
 
             {/* Map Container with Zoom/Pan */}
-            <div className="border-2 border-nigeria-green/30 rounded-xl overflow-hidden bg-muted/30 shadow-lg">
+            <div className="border-2 border-primary/30 rounded-xl overflow-hidden bg-muted/30 shadow-lg">
               <TransformWrapper
                 initialScale={1}
                 minScale={0.5}
@@ -387,7 +404,7 @@ const StateMaps = () => {
             {/* Map Information Panel */}
             {mapLoaded && (
               <div className="p-6 rounded-xl bg-card border border-border space-y-4">
-                <h4 className="text-lg font-semibold text-nigeria-green">About This Map</h4>
+                <h4 className="text-lg font-semibold text-primary">About This Map</h4>
                 <p className="text-sm text-muted-foreground">
                   This is the official NIPOST postal code map for {selectedStateName} State. 
                   The map shows Local Government Areas (LGAs) and their corresponding postal codes.
@@ -424,7 +441,7 @@ const StateMaps = () => {
                   </Button>
                   <Button 
                     asChild
-                    className="gap-2 bg-nigeria-orange hover:bg-nigeria-orange/90"
+                    className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
                   >
                     <Link to="/">
                       <Navigation className="h-4 w-4" />
@@ -445,8 +462,8 @@ const StateMaps = () => {
             {/* Brand */}
             <div className="col-span-1 sm:col-span-2 lg:col-span-1">
               <Link to="/" className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
-                <div className="p-1.5 bg-nigeria-green/20 rounded-lg">
-                  <MapPin className="h-4 w-4 text-nigeria-green" />
+                <div className="p-1.5 bg-primary/20 rounded-lg">
+                  <MapPin className="h-4 w-4 text-primary" />
                 </div>
                 <h3 className="text-sm font-bold text-foreground">AI-based Nigeria Zip Postal Code Finder</h3>
               </Link>
@@ -459,9 +476,9 @@ const StateMaps = () => {
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-4">Quick Links</h4>
               <nav className="flex flex-col gap-3">
-                <Link to="/" className="text-sm text-muted-foreground hover:text-nigeria-green transition-colors">Home</Link>
-                <Link to="/state-maps" className="text-sm text-muted-foreground hover:text-nigeria-green transition-colors">State Maps</Link>
-                <Link to="/blog" className="text-sm text-muted-foreground hover:text-nigeria-green transition-colors">Blog</Link>
+                <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Home</Link>
+                <Link to="/state-maps" className="text-sm text-muted-foreground hover:text-primary transition-colors">State Maps</Link>
+                <Link to="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</Link>
               </nav>
             </div>
 
@@ -469,7 +486,7 @@ const StateMaps = () => {
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-4">Resources</h4>
               <nav className="flex flex-col gap-3">
-                <Link to="/blog/nipost-services-guide" className="text-sm text-muted-foreground hover:text-nigeria-green transition-colors">NIPOST Guide</Link>
+                <Link to="/blog/nipost-services-guide" className="text-sm text-muted-foreground hover:text-primary transition-colors">NIPOST Guide</Link>
               </nav>
             </div>
 
