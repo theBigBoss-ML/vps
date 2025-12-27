@@ -156,6 +156,12 @@ const Index = () => {
           </Link>
           <nav className="flex items-center gap-4">
             <Link 
+              to="/state-maps" 
+              className="text-sm text-muted-foreground hover:text-nigeria-green transition-colors hidden sm:block"
+            >
+              State Maps
+            </Link>
+            <Link 
               to="/blog" 
               className="text-sm text-muted-foreground hover:text-nigeria-green transition-colors"
             >
@@ -262,6 +268,7 @@ const Index = () => {
               <h4 className="text-sm font-semibold text-foreground mb-4">Quick Links</h4>
               <nav className="flex flex-col gap-3">
                 <Link to="/" className="text-sm text-muted-foreground hover:text-nigeria-green transition-colors">Home</Link>
+                <Link to="/state-maps" className="text-sm text-muted-foreground hover:text-nigeria-green transition-colors">State Maps</Link>
                 <Link to="/blog" className="text-sm text-muted-foreground hover:text-nigeria-green transition-colors">Blog</Link>
               </nav>
             </div>
