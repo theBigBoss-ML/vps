@@ -3,7 +3,7 @@ import { MapPin, Search, Sparkles } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LocationButton } from '@/components/finder/LocationButton';
 import { PostalCodeDisplay } from '@/components/finder/PostalCodeDisplay';
-import { ManualSearch } from '@/components/finder/ManualSearch';
+
 import { SmartSearch } from '@/components/finder/SmartSearch';
 import { RecentLocations } from '@/components/finder/RecentLocations';
 import { ErrorMessage } from '@/components/finder/ErrorMessage';
@@ -72,43 +72,6 @@ const Index = () => {
       setError('Could not find postal code for your location. Try manual search.');
     }
   }, [getCurrentPosition, geoError, addRecentLocation]);
-
-  const handleManualSearch = useCallback((state: string, lga: string) => {
-    setError(null);
-    setStatus('geocoding');
-
-    // Find in database
-    const match = defaultPostalCodes.find(
-      pc => pc.state.toLowerCase() === state.toLowerCase() && 
-            pc.lga.toLowerCase().includes(lga.toLowerCase())
-    );
-
-    if (match) {
-      const locationResult: LocationResult = {
-        postalCode: match.postalCode,
-        source: 'database',
-        address: `${match.locality}, ${match.area}, ${match.lga}, ${match.state}`,
-        lga: match.lga,
-        area: match.area,
-        state: match.state,
-        confidence: 85,
-        coordinates: { lat: 0, lng: 0 },
-        timestamp: new Date(),
-      };
-      setResult(locationResult);
-      setStatus('success');
-      addRecentLocation({
-        postalCode: match.postalCode,
-        address: locationResult.address,
-        area: match.area,
-        lga: match.lga,
-      });
-      toast.success('Postal code found!');
-    } else {
-      setStatus('error');
-      setError(`No postal code found for ${lga}, ${state}. Our database is being expanded.`);
-    }
-  }, [addRecentLocation]);
 
   const handleSmartSearch = useCallback((result: PostalCode) => {
     const locationResult: LocationResult = {
@@ -201,22 +164,6 @@ const Index = () => {
               </p>
             </div>
 
-            {/* Smart Search - Primary Option */}
-            <div className="space-y-4">
-              <SmartSearch onSelect={handleSmartSearch} isLoading={isLoading} />
-            </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-3 text-muted-foreground">
-                  Or use other methods
-                </span>
-              </div>
-            </div>
-
             {(error || geoError) && (
               <ErrorMessage 
                 message={error || geoError || ''} 
@@ -245,8 +192,8 @@ const Index = () => {
                 />
               </TabsContent>
 
-              <TabsContent value="manual">
-                <ManualSearch onSearch={handleManualSearch} isLoading={isLoading} />
+              <TabsContent value="manual" className="space-y-4">
+                <SmartSearch onSelect={handleSmartSearch} isLoading={isLoading} />
               </TabsContent>
             </Tabs>
           </div>
