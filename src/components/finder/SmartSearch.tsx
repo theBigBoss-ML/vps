@@ -196,23 +196,26 @@ export function SmartSearch({ onSelect, isLoading }: SmartSearchProps) {
 
   return (
     <div ref={containerRef} className="relative w-full">
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
-        <Input
-          ref={inputRef}
-          type="text"
-          value={query}
-          onChange={(e) => handleSearch(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onFocus={() => hasResults && setShowSuggestions(true)}
-          placeholder="Type a location name e.g. Lekki, Ikeja..."
-          className="pl-12 pr-10 h-14 text-base rounded-xl border-2 border-primary/30 bg-primary/5 focus:border-primary focus:bg-background placeholder:text-muted-foreground/70 transition-all shadow-sm"
-          disabled={isLoading}
-          aria-label="Search for Nigeria zip postal code by location"
-          aria-autocomplete="list"
-          aria-controls="smart-search-suggestions"
-          aria-expanded={showSuggestions}
-        />
+      <div className="relative group">
+        <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 via-nigeria-green/40 to-primary/50 rounded-xl blur-md opacity-75 group-hover:opacity-100 animate-pulse transition-opacity duration-500" />
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
+          <Input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={(e) => handleSearch(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={() => hasResults && setShowSuggestions(true)}
+            placeholder="Type a location name e.g. Lekki, Ikeja..."
+            className="pl-12 pr-10 h-14 text-base rounded-xl border-2 border-primary bg-background focus:border-primary focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground/70 transition-all shadow-lg relative"
+            disabled={isLoading}
+            aria-label="Search for Nigeria zip postal code by location"
+            aria-autocomplete="list"
+            aria-controls="smart-search-suggestions"
+            aria-expanded={showSuggestions}
+          />
+        </div>
         {(query || isFetchingPlaces) && (
           <Button
             variant="ghost"
