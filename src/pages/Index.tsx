@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Search, Sparkles, BookOpen } from 'lucide-react';
+import { MapPin, Search, Sparkles } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LocationButton } from '@/components/finder/LocationButton';
 import { PostalCodeDisplay } from '@/components/finder/PostalCodeDisplay';
@@ -138,17 +138,16 @@ const Index = () => {
               <p className="text-xs text-muted-foreground hidden sm:block">AI-based Nigeria zip postal code finder</p>
             </div>
           </div>
-          <div className="flex items-center gap-1">
+          <nav className="flex items-center gap-4">
             <Link 
               to="/blog" 
-              className="flex items-center gap-1.5 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50"
+              className="text-sm text-muted-foreground hover:text-nigeria-green transition-colors"
             >
-              <BookOpen className="h-4 w-4" />
-              <span className="hidden sm:inline">Blog</span>
+              Blog
             </Link>
             <ApiKeySettings onKeyUpdate={() => setApiKeyVersion(v => v + 1)} />
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
-          </div>
+          </nav>
         </div>
       </header>
 
@@ -208,17 +207,28 @@ const Index = () => {
         )}
       </main>
 
-      <footer className="border-t border-border/50 py-6 mt-auto">
-        <div className="container mx-auto px-4 text-center space-y-3">
-          <p className="text-sm font-medium text-foreground">AI-based Nigeria Zip Postal Code Finder</p>
-          <p className="text-xs text-muted-foreground">Free & Fast Nigeria Zip Postal Code Lookup</p>
-          <Link 
-            to="/blog" 
-            className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
-          >
-            <BookOpen className="h-3 w-3" />
-            Read our blog for postal service guides
-          </Link>
+      <footer className="border-t border-border/50 py-8 mt-auto bg-card/30">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3">AI-based Nigeria Zip Postal Code Finder</h3>
+              <p className="text-xs text-muted-foreground">Free & fast Nigeria zip postal code lookup using GPS or smart search.</p>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3">Quick Links</h3>
+              <nav className="flex flex-col gap-2">
+                <Link to="/" className="text-xs text-muted-foreground hover:text-nigeria-green transition-colors">Home</Link>
+                <Link to="/blog" className="text-xs text-muted-foreground hover:text-nigeria-green transition-colors">Blog</Link>
+              </nav>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3">About</h3>
+              <p className="text-xs text-muted-foreground">Helping Nigerians find accurate postal codes since 2024.</p>
+            </div>
+          </div>
+          <div className="border-t border-border/50 mt-6 pt-6 text-center">
+            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Nigeria Zip Code. All rights reserved.</p>
+          </div>
         </div>
       </footer>
     </div>
