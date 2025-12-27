@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LocationButton } from '@/components/finder/LocationButton';
 import { PostalCodeDisplay } from '@/components/finder/PostalCodeDisplay';
 import { SmartSearch } from '@/components/finder/SmartSearch';
+import { ManualSearch } from '@/components/finder/ManualSearch';
 import { RecentLocations } from '@/components/finder/RecentLocations';
 import { ErrorMessage } from '@/components/finder/ErrorMessage';
 import { LoadingState } from '@/components/finder/LoadingState';
@@ -16,7 +17,7 @@ import { useRecentLocations } from '@/hooks/useRecentLocations';
 import { useTheme } from '@/hooks/useTheme';
 import { useUsageStats } from '@/hooks/useUsageStats';
 import { LocationResult, LookupStatus, RecentLocation } from '@/types/location';
-import { rateLimitedGetPostalCode } from '@/lib/postalCodeService';
+import { rateLimitedGetPostalCode, getPostalCodeByStateLga } from '@/lib/postalCodeService';
 import { PostalCode } from '@/data/postalCodes';
 import { toast } from 'sonner';
 
@@ -99,6 +100,35 @@ const Index = () => {
     });
     trackStat('generation', result.postalCode);
     toast.success('Nigeria zip postal code found!');
+  }, [addRecentLocation, trackStat]);
+
+  const handleManualSearch = useCallback((state: string, lga: string) => {
+    const result = getPostalCodeByStateLga(state, lga);
+    if (result) {
+      const locationResult: LocationResult = {
+        postalCode: result.postalCode,
+        source: 'database',
+        address: `${result.locality}, ${result.area}, ${result.lga}, ${result.state}`,
+        lga: result.lga,
+        area: result.area,
+        state: result.state,
+        confidence: 100,
+        coordinates: { lat: 0, lng: 0 },
+        timestamp: new Date(),
+      };
+      setResult(locationResult);
+      setStatus('success');
+      addRecentLocation({
+        postalCode: result.postalCode,
+        address: locationResult.address,
+        area: result.area,
+        lga: result.lga,
+      });
+      trackStat('generation', result.postalCode);
+      toast.success('Nigeria zip postal code found!');
+    } else {
+      setError(`No postal code found for ${lga}, ${state}. Try using the smart search instead.`);
+    }
   }, [addRecentLocation, trackStat]);
 
   const handleSelectRecent = useCallback((location: RecentLocation) => {
@@ -237,7 +267,16 @@ const Index = () => {
                 />
               </TabsContent>
 
-              <TabsContent value="manual" className="space-y-4">
+              <TabsContent value="manual" className="space-y-6">
+                <ManualSearch onSearch={handleManualSearch} isLoading={isLoading} />
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-border" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">or search by name</span>
+                  </div>
+                </div>
                 <SmartSearch onSelect={handleSmartSearch} isLoading={isLoading} />
               </TabsContent>
             </Tabs>

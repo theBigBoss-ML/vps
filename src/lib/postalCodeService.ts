@@ -1,8 +1,23 @@
 import { LocationResult } from '@/types/location';
-import { defaultPostalCodes } from '@/data/postalCodes';
+import { defaultPostalCodes, PostalCode } from '@/data/postalCodes';
 import { extractAddressComponents, matchAddressToPostalCode } from './matchingAlgorithm';
 
 const GEOCODE_API_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
+
+// Find postal code by state and LGA
+export function getPostalCodeByStateLga(state: string, lga: string): PostalCode | null {
+  const normalizedState = state.toLowerCase().trim();
+  const normalizedLga = lga.toLowerCase().trim();
+  
+  // Find exact match for state and LGA
+  const match = defaultPostalCodes.find(
+    (pc) => 
+      pc.state.toLowerCase() === normalizedState && 
+      pc.lga.toLowerCase() === normalizedLga
+  );
+  
+  return match || null;
+}
 
 export async function getPostalCodeFromCoordinates(
   lat: number,
