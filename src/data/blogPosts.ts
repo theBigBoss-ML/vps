@@ -116,7 +116,7 @@ const nipostPost: BlogPost = {
     name: 'Nigeria Zip Code Team',
     role: 'Editorial Team',
   },
-  publishedAt: '2024-12-27',
+  publishedAt: '2025-12-27',
   readingTime: calculateReadingTime(nipostServicesContent),
   category: 'Postal Services',
   tags: ['NIPOST', 'Nigeria Postal Service', 'Mail Services', 'Nigeria Zip Postal Code', 'Postal Orders'],
