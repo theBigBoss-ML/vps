@@ -397,8 +397,8 @@ export function SmartSearch({ onSelect, isLoading }: SmartSearchProps) {
                       onClick={() => handleSelectPlace(prediction)}
                       onMouseEnter={() => setSelectedIndex(adjustedIndex)}
                     >
-                      <div className="p-2 bg-blue-500/10 rounded-lg shrink-0 mt-0.5">
-                        <Search className="h-4 w-4 text-blue-500" />
+                      <div className="p-2 bg-nigeria-green/10 rounded-lg shrink-0 mt-0.5">
+                        <MapPin className="h-4 w-4 text-nigeria-green" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <span className="font-medium text-foreground truncate block">
@@ -419,9 +419,6 @@ export function SmartSearch({ onSelect, isLoading }: SmartSearchProps) {
         </div>
       )}
 
-      <p className="mt-3 text-xs text-center text-muted-foreground">
-        Try: "VI", "Lekki", "Ikeja GRA", "Surulere", "Ajah"
-      </p>
     </div>
   );
 }
