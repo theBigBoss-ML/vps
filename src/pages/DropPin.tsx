@@ -1,35 +1,12 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Copy, Share2, Star, RotateCcw, Navigation, Search, Loader2, MapPinned, Trash2 } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { MapPin, Copy, Share2, Star, Navigation, Search, Loader2, MapPinned, Trash2 } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/finder/ThemeToggle';
 import { useTheme } from '@/hooks/useTheme';
 import { toast } from 'sonner';
-
-// Fix for default marker icons in react-leaflet
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
-// Custom marker icon with brand colors
-const customMarkerIcon = L.divIcon({
-  className: 'custom-pin-marker',
-  html: `
-    <div class="pin-marker">
-      <div class="pin-head"></div>
-      <div class="pin-point"></div>
-    </div>
-  `,
-  iconSize: [30, 42],
-  iconAnchor: [15, 42],
-  popupAnchor: [0, -42]
-});
 
 interface PinData {
   lat: number;
@@ -39,33 +16,72 @@ interface PinData {
   state: string | null;
   lga: string | null;
   source: 'nominatim' | 'database' | null;
+  marker?: L.Marker;
 }
 
-// Nigeria bounds
+// Nigeria bounds and center
 const NIGERIA_BOUNDS: L.LatLngBoundsExpression = [
-  [4.2, 2.7],  // Southwest
-  [13.9, 14.7] // Northeast
+  [4.2, 2.7],
+  [13.9, 14.7]
 ];
-
 const NIGERIA_CENTER: L.LatLngExpression = [9.0820, 8.6753];
 
-function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
-  useMapEvents({
-    click(e) {
-      const { lat, lng } = e.latlng;
-      onMapClick(lat, lng);
-    },
-  });
-  return null;
-}
-
 const DropPin = () => {
+  const mapRef = useRef<L.Map | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
   const [pins, setPins] = useState<PinData[]>([]);
   const [currentPin, setCurrentPin] = useState<PinData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [mapReady, setMapReady] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
-  const handlePinDrop = useCallback(async (lat: number, lng: number) => {
+  // Create custom marker icon
+  const createCustomIcon = () => {
+    return L.divIcon({
+      className: 'custom-pin-marker',
+      html: `
+        <div class="pin-marker">
+          <div class="pin-head"></div>
+          <div class="pin-point"></div>
+        </div>
+      `,
+      iconSize: [30, 42],
+      iconAnchor: [15, 42],
+      popupAnchor: [0, -42]
+    });
+  };
+
+  // Initialize map
+  useEffect(() => {
+    if (!mapContainerRef.current || mapRef.current) return;
+
+    const map = L.map(mapContainerRef.current, {
+      center: NIGERIA_CENTER,
+      zoom: 6,
+      maxBounds: NIGERIA_BOUNDS,
+      minZoom: 5,
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    map.on('click', (e: L.LeafletMouseEvent) => {
+      handlePinDrop(e.latlng.lat, e.latlng.lng, map);
+    });
+
+    mapRef.current = map;
+    setMapReady(true);
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, []);
+
+  const handlePinDrop = useCallback(async (lat: number, lng: number, map: L.Map) => {
     setLoading(true);
     
     const newPin: PinData = {
@@ -95,12 +111,30 @@ const DropPin = () => {
         newPin.state = nominatimData.address?.state || null;
         newPin.lga = nominatimData.address?.county || nominatimData.address?.city || null;
         
-        // Try to get postal code from Nominatim response
         if (nominatimData.address?.postcode) {
           newPin.postalCode = nominatimData.address.postcode;
           newPin.source = 'nominatim';
         }
       }
+
+      // Add marker to map
+      const marker = L.marker([lat, lng], { icon: createCustomIcon() }).addTo(map);
+      
+      const popupContent = `
+        <div class="pin-popup">
+          <h4 style="color: hsl(152, 69%, 31%); font-weight: bold; margin-bottom: 8px;">📍 Dropped Pin</h4>
+          ${newPin.address ? `<p style="font-size: 12px; color: #666; margin-bottom: 8px;">${newPin.address.substring(0, 100)}...</p>` : ''}
+          ${newPin.postalCode 
+            ? `<div style="background: hsl(152, 69%, 31%, 0.1); padding: 8px; border-radius: 6px; text-align: center; margin-bottom: 8px;">
+                <span style="font-family: monospace; font-size: 18px; font-weight: bold; color: hsl(152, 69%, 31%);">${newPin.postalCode}</span>
+               </div>` 
+            : '<p style="font-size: 12px; color: #999; font-style: italic;">No postal code available</p>'
+          }
+        </div>
+      `;
+      
+      marker.bindPopup(popupContent).openPopup();
+      newPin.marker = marker;
       
       setCurrentPin(newPin);
       setPins(prev => [...prev, newPin]);
@@ -115,7 +149,6 @@ const DropPin = () => {
       console.error('Error finding postal code:', error);
       newPin.address = 'Error determining location';
       setCurrentPin(newPin);
-      setPins(prev => [...prev, newPin]);
       toast.error('Error finding location details');
     } finally {
       setLoading(false);
@@ -123,6 +156,10 @@ const DropPin = () => {
   }, []);
 
   const removePin = useCallback((index: number) => {
+    const pinToRemove = pins[index];
+    if (pinToRemove?.marker && mapRef.current) {
+      mapRef.current.removeLayer(pinToRemove.marker);
+    }
     setPins(prev => prev.filter((_, i) => i !== index));
     if (pins[index] === currentPin) {
       setCurrentPin(null);
@@ -131,10 +168,15 @@ const DropPin = () => {
   }, [pins, currentPin]);
 
   const clearAllPins = useCallback(() => {
+    pins.forEach(pin => {
+      if (pin.marker && mapRef.current) {
+        mapRef.current.removeLayer(pin.marker);
+      }
+    });
     setPins([]);
     setCurrentPin(null);
     toast.success('All pins cleared');
-  }, []);
+  }, [pins]);
 
   const copyToClipboard = useCallback((postalCode: string) => {
     navigator.clipboard.writeText(postalCode);
@@ -153,7 +195,15 @@ const DropPin = () => {
 
   const saveToFavorites = useCallback((pin: PinData) => {
     const favorites = JSON.parse(localStorage.getItem('favoritePins') || '[]');
-    favorites.push(pin);
+    favorites.push({
+      lat: pin.lat,
+      lng: pin.lng,
+      address: pin.address,
+      postalCode: pin.postalCode,
+      state: pin.state,
+      lga: pin.lga,
+      source: pin.source
+    });
     localStorage.setItem('favoritePins', JSON.stringify(favorites));
     toast.success('Saved to favorites!');
   }, []);
@@ -246,50 +296,11 @@ const DropPin = () => {
 
         {/* Map Section */}
         <div className="border-2 border-primary/30 rounded-xl overflow-hidden mb-6 shadow-lg">
-          <div className="h-[400px] md:h-[500px]">
-            <MapContainer
-              center={NIGERIA_CENTER}
-              zoom={6}
-              style={{ height: '100%', width: '100%' }}
-              maxBounds={NIGERIA_BOUNDS}
-              minZoom={5}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <MapClickHandler onMapClick={handlePinDrop} />
-              
-              {pins.map((pin, index) => (
-                <Marker key={index} position={[pin.lat, pin.lng]} icon={customMarkerIcon}>
-                  <Popup>
-                    <div className="min-w-[200px] p-2">
-                      <h4 className="font-bold text-primary mb-2">📍 Pin {index + 1}</h4>
-                      {pin.address && (
-                        <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{pin.address}</p>
-                      )}
-                      {pin.postalCode ? (
-                        <div className="bg-primary/10 p-2 rounded-md text-center mb-2">
-                          <span className="font-mono text-lg font-bold text-primary">{pin.postalCode}</span>
-                        </div>
-                      ) : (
-                        <p className="text-xs text-muted-foreground italic mb-2">No postal code available</p>
-                      )}
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => removePin(index)}
-                        className="w-full text-xs"
-                      >
-                        <Trash2 className="h-3 w-3 mr-1" />
-                        Remove Pin
-                      </Button>
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
-            </MapContainer>
-          </div>
+          <div 
+            ref={mapContainerRef} 
+            className="h-[400px] md:h-[500px] w-full"
+            style={{ minHeight: '400px' }}
+          />
         </div>
 
         {/* Pin Controls */}
@@ -472,7 +483,7 @@ const DropPin = () => {
         .pin-head {
           width: 24px;
           height: 24px;
-          background: hsl(var(--primary));
+          background: hsl(152, 69%, 31%);
           border: 3px solid white;
           border-radius: 50%;
           position: absolute;
@@ -486,7 +497,7 @@ const DropPin = () => {
           height: 0;
           border-left: 8px solid transparent;
           border-right: 8px solid transparent;
-          border-top: 18px solid hsl(var(--primary));
+          border-top: 18px solid hsl(152, 69%, 31%);
           position: absolute;
           bottom: 0;
           left: 7px;
@@ -498,7 +509,11 @@ const DropPin = () => {
         }
         
         .leaflet-popup-content {
-          margin: 0;
+          margin: 8px 12px;
+        }
+        
+        .pin-popup {
+          min-width: 200px;
         }
       `}</style>
     </div>
