@@ -136,7 +136,7 @@ export function PostalCodeDisplay({ result, onReset, onCopy, onFeedback }: Posta
         </p>
         <div className="flex items-center justify-center gap-4">
           <span 
-            className="text-4xl sm:text-5xl md:text-6xl font-bold text-primary tracking-wider mono"
+            className="text-4xl sm:text-5xl md:text-6xl font-bold text-primary postal-code"
             aria-label={`Postal code: ${result.postalCode.split('').join(' ')}`}
           >
             {result.postalCode}
@@ -299,7 +299,7 @@ export function PostalCodeDisplay({ result, onReset, onCopy, onFeedback }: Posta
                 {hasValidCoordinates && (
                   <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground">
                     <MapPin className="h-3 w-3" />
-                    <span className="font-mono">
+                    <span className="tabular-nums">
                       {result.coordinates.lat.toFixed(5)}, {result.coordinates.lng.toFixed(5)}
                     </span>
                   </div>

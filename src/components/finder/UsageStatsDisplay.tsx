@@ -41,21 +41,21 @@ export function UsageStatsDisplay({ generations, likes, copies, loading }: Usage
           <div className="flex flex-col items-center gap-2">
             <div className="flex items-center gap-2">
               <Zap className="h-5 w-5 text-nigeria-green" />
-              <span className="text-2xl sm:text-3xl font-bold text-foreground">{formatNumber(generations)}</span>
+              <span className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">{formatNumber(generations)}</span>
             </div>
             <span className="text-xs sm:text-sm text-muted-foreground text-center">Codes Generated</span>
           </div>
           <div className="flex flex-col items-center gap-2">
             <div className="flex items-center gap-2">
               <ThumbsUp className="h-5 w-5 text-nigeria-green" />
-              <span className="text-2xl sm:text-3xl font-bold text-foreground">{formatNumber(likes)}</span>
+              <span className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">{formatNumber(likes)}</span>
             </div>
             <span className="text-xs sm:text-sm text-muted-foreground text-center">Helpful Votes</span>
           </div>
           <div className="flex flex-col items-center gap-2">
             <div className="flex items-center gap-2">
               <Copy className="h-5 w-5 text-nigeria-green" />
-              <span className="text-2xl sm:text-3xl font-bold text-foreground">{formatNumber(copies)}</span>
+              <span className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">{formatNumber(copies)}</span>
             </div>
             <span className="text-xs sm:text-sm text-muted-foreground text-center">Codes Copied</span>
           </div>
