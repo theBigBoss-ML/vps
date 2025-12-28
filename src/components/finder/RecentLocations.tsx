@@ -46,7 +46,7 @@ export function RecentLocations({ locations, onSelect, onClear }: RecentLocation
                   <MapPin className="h-4 w-4" aria-hidden="true" />
                 </div>
                 <div>
-                  <p className="font-mono font-semibold text-foreground">
+                  <p className="font-semibold text-foreground postal-code">
                     {location.postalCode}
                   </p>
                   <p className="text-xs text-muted-foreground truncate max-w-[200px]">
