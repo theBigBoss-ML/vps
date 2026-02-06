@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
-import { MapPin, MagnifyingGlass, Compass, Warning } from '@phosphor-icons/react';
+import { MapPin, MagnifyingGlass, Crosshair, Warning } from '@phosphor-icons/react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LocationButton } from '@/components/finder/LocationButton';
 import { SmartSearch } from '@/components/finder/SmartSearch';
@@ -242,7 +242,7 @@ const Index = () => {
           <div className="space-y-8">
             <div className="text-center space-y-3">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full">
-                <Compass className="h-3 w-3" />
+                <Crosshair className="h-3 w-3" />
                 AI-assisted GPS + Smart Search
               </div>
               <h2 className="text-2xl font-bold text-foreground">
