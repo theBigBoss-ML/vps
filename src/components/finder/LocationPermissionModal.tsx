@@ -37,9 +37,10 @@ function FeatureItem({ icon: Icon, title, description }: {
 }
 
 function EnableInstructions() {
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const isAndroid = /Android/i.test(navigator.userAgent);
+  const userAgent = typeof navigator === 'undefined' ? '' : navigator.userAgent;
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(userAgent);
+  const isIOS = /iPhone|iPad|iPod/i.test(userAgent);
+  const isAndroid = /Android/i.test(userAgent);
 
   return (
     <div className="space-y-4">
@@ -75,7 +76,7 @@ function EnableInstructions() {
             </div>
             <ol className="text-xs text-muted-foreground space-y-2 list-decimal list-inside">
               <li>Open <strong>Settings</strong> app</li>
-              <li>Tap <strong>Location</strong> (or Privacy → Location)</li>
+              <li>Tap <strong>Location</strong> (or Privacy -&gt; Location)</li>
               <li>Ensure Location is <strong>ON</strong></li>
               <li>Tap <strong>App permissions</strong></li>
               <li>Find your browser and set to <strong>Allow</strong></li>
@@ -89,7 +90,7 @@ function EnableInstructions() {
               <span>Browser Instructions</span>
             </div>
             <ol className="text-xs text-muted-foreground space-y-2 list-decimal list-inside">
-              <li>Click the <strong>lock icon</strong> (🔒) in your browser's address bar</li>
+              <li>Click the <strong>lock icon</strong> in your browser's address bar</li>
               <li>Find <strong>Location</strong> in the permissions</li>
               <li>Change to <strong>Allow</strong></li>
               <li>Refresh this page</li>
@@ -188,7 +189,7 @@ export function LocationPermissionModal({
                   onClick={handleSkip}
                   className="w-full text-muted-foreground hover:text-foreground"
                 >
-                  Skip for now — I'll use manual search
+                  Skip for now - I'll use manual search
                 </Button>
               </div>
             </>

@@ -1,5 +1,7 @@
+"use client";
+
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { MapPin, Map, Download, ZoomIn, ZoomOut, RotateCcw, Loader2, Info, Navigation, Check, ChevronsUpDown, ExternalLink } from 'lucide-react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { Button } from '@/components/ui/button';
@@ -135,7 +137,7 @@ const StateMaps = () => {
       {/* Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-xl sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="p-2 bg-primary/20 rounded-xl">
               <MapPin className="h-6 w-6 text-primary" aria-hidden="true" />
             </div>
@@ -146,19 +148,19 @@ const StateMaps = () => {
           </Link>
           <nav className="flex items-center gap-4">
             <Link 
-              to="/" 
+              href="/" 
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               Home
             </Link>
             <Link 
-              to="/state-maps" 
+              href="/state-maps" 
               className="text-sm text-primary font-medium"
             >
               State Maps
             </Link>
             <Link 
-              to="/blog" 
+              href="/blog" 
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               Blog
@@ -265,27 +267,27 @@ const StateMaps = () => {
             <h3 className="text-lg font-semibold text-primary mb-4">How to Use:</h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-sm text-foreground/80">
-                <span className="text-lg">📌</span>
+                <span className="text-lg">*</span>
                 <span>Select your state from the dropdown above</span>
               </li>
               <li className="flex items-start gap-3 text-sm text-foreground/80">
-                <span className="text-lg">🗺️</span>
+                <span className="text-lg">*</span>
                 <span>Click "View Map" to load the postal code map</span>
               </li>
               <li className="flex items-start gap-3 text-sm text-foreground/80">
-                <span className="text-lg">🔍</span>
+                <span className="text-lg">*</span>
                 <span>Use [+] [-] buttons to zoom in and out</span>
               </li>
               <li className="flex items-start gap-3 text-sm text-foreground/80">
-                <span className="text-lg">↔️</span>
+                <span className="text-lg">*</span>
                 <span>Click and drag to pan around the map</span>
               </li>
               <li className="flex items-start gap-3 text-sm text-foreground/80">
-                <span className="text-lg">📮</span>
+                <span className="text-lg">*</span>
                 <span>Postal codes are marked on the map</span>
               </li>
               <li className="flex items-start gap-3 text-sm text-foreground/80">
-                <span className="text-lg">💾</span>
+                <span className="text-lg">*</span>
                 <span>Download the map for offline reference</span>
               </li>
             </ul>
@@ -426,15 +428,15 @@ const StateMaps = () => {
                   <h5 className="text-sm font-semibold text-foreground mb-3">Map Legend:</h5>
                   <ul className="space-y-2">
                     <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>🗺️</span>
+                      <span>*</span>
                       <span>Colored regions: Different LGAs</span>
                     </li>
                     <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>📮</span>
+                      <span>*</span>
                       <span>Numbers on map: Postal codes</span>
                     </li>
                     <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>🛣️</span>
+                      <span>*</span>
                       <span>Boundary lines: LGA borders</span>
                     </li>
                   </ul>
@@ -454,7 +456,7 @@ const StateMaps = () => {
                     asChild
                     className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
                   >
-                    <Link to="/">
+                    <Link href="/">
                       <Navigation className="h-4 w-4" />
                       Use GPS Detection Instead
                     </Link>
@@ -472,7 +474,7 @@ const StateMaps = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Brand */}
             <div className="col-span-1 sm:col-span-2 lg:col-span-1">
-              <Link to="/" className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
+              <Link href="/" className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
                 <div className="p-1.5 bg-primary/20 rounded-lg">
                   <MapPin className="h-4 w-4 text-primary" />
                 </div>
@@ -487,9 +489,9 @@ const StateMaps = () => {
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-4">Quick Links</h4>
               <nav className="flex flex-col gap-3">
-                <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Home</Link>
-                <Link to="/state-maps" className="text-sm text-muted-foreground hover:text-primary transition-colors">State Maps</Link>
-                <Link to="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</Link>
+                <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Home</Link>
+                <Link href="/state-maps" className="text-sm text-muted-foreground hover:text-primary transition-colors">State Maps</Link>
+                <Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</Link>
               </nav>
             </div>
 
@@ -497,7 +499,7 @@ const StateMaps = () => {
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-4">Resources</h4>
               <nav className="flex flex-col gap-3">
-                <Link to="/blog/nipost-services-guide" className="text-sm text-muted-foreground hover:text-primary transition-colors">NIPOST Guide</Link>
+                <Link href="/blog/nipost-services-guide" className="text-sm text-muted-foreground hover:text-primary transition-colors">NIPOST Guide</Link>
               </nav>
             </div>
 
@@ -513,7 +515,7 @@ const StateMaps = () => {
           {/* Copyright */}
           <div className="border-t border-border/50 mt-8 pt-6">
             <p className="text-sm text-muted-foreground text-center sm:text-left">
-              © {new Date().getFullYear()} AI-based Nigeria Zip Postal Code Finder. All rights reserved.
+              (c) {new Date().getFullYear()} AI-based Nigeria Zip Postal Code Finder. All rights reserved.
             </p>
           </div>
         </div>

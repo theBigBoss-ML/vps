@@ -22,6 +22,9 @@ const MODAL_SEEN_KEY = 'location-modal-seen';
 export function useLocationPermission(): UseLocationPermissionReturn {
   const [permissionStatus, setPermissionStatus] = useState<LocationPermissionStatus>('unknown');
   const [hasSeenModal, setHasSeenModal] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
     return localStorage.getItem(MODAL_SEEN_KEY) === 'true';
   });
   const [showModal, setShowModal] = useState(false);
@@ -81,7 +84,9 @@ export function useLocationPermission(): UseLocationPermissionReturn {
   }, []);
 
   const markModalSeen = useCallback(() => {
-    localStorage.setItem(MODAL_SEEN_KEY, 'true');
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(MODAL_SEEN_KEY, 'true');
+    }
     setHasSeenModal(true);
     setShowModal(false);
   }, []);

@@ -1,8 +1,9 @@
+"use client";
+
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { MapPin, Copy, Share2, Star, Navigation, Search, Loader2, MapPinned, Trash2 } from 'lucide-react';
 import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/finder/ThemeToggle';
 import { useTheme } from '@/hooks/useTheme';
@@ -51,36 +52,6 @@ const DropPin = () => {
     });
   };
 
-  // Initialize map
-  useEffect(() => {
-    if (!mapContainerRef.current || mapRef.current) return;
-
-    const map = L.map(mapContainerRef.current, {
-      center: NIGERIA_CENTER,
-      zoom: 6,
-      maxBounds: NIGERIA_BOUNDS,
-      minZoom: 5,
-    });
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    map.on('click', (e: L.LeafletMouseEvent) => {
-      handlePinDrop(e.latlng.lat, e.latlng.lng, map);
-    });
-
-    mapRef.current = map;
-    setMapReady(true);
-
-    return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
-      }
-    };
-  }, []);
-
   const handlePinDrop = useCallback(async (lat: number, lng: number, map: L.Map) => {
     setLoading(true);
     
@@ -122,7 +93,7 @@ const DropPin = () => {
       
       const popupContent = `
         <div class="pin-popup">
-          <h4 style="color: hsl(152, 69%, 31%); font-weight: bold; margin-bottom: 8px;">📍 Dropped Pin</h4>
+          <h4 style="color: hsl(152, 69%, 31%); font-weight: bold; margin-bottom: 8px;">Dropped Pin</h4>
           ${newPin.address ? `<p style="font-size: 12px; color: #666; margin-bottom: 8px;">${newPin.address.substring(0, 100)}...</p>` : ''}
           ${newPin.postalCode 
             ? `<div style="background: hsl(152, 69%, 31%, 0.1); padding: 8px; border-radius: 6px; text-align: center; margin-bottom: 8px;">
@@ -154,6 +125,36 @@ const DropPin = () => {
       setLoading(false);
     }
   }, []);
+
+  // Initialize map
+  useEffect(() => {
+    if (!mapContainerRef.current || mapRef.current) return;
+
+    const map = L.map(mapContainerRef.current, {
+      center: NIGERIA_CENTER,
+      zoom: 6,
+      maxBounds: NIGERIA_BOUNDS,
+      minZoom: 5,
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    map.on('click', (e: L.LeafletMouseEvent) => {
+      handlePinDrop(e.latlng.lat, e.latlng.lng, map);
+    });
+
+    mapRef.current = map;
+    setMapReady(true);
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, [handlePinDrop]);
 
   const removePin = useCallback((index: number) => {
     const pinToRemove = pins[index];
@@ -213,7 +214,7 @@ const DropPin = () => {
       {/* Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-xl sticky top-0 z-[1000]">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="p-2 bg-primary/20 rounded-xl">
               <MapPin className="h-6 w-6 text-primary" aria-hidden="true" />
             </div>
@@ -224,25 +225,25 @@ const DropPin = () => {
           </Link>
           <nav className="flex items-center gap-4">
             <Link 
-              to="/" 
+              href="/" 
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               Home
             </Link>
             <Link 
-              to="/drop-pin" 
+              href="/drop-pin" 
               className="text-sm text-primary font-medium"
             >
               Drop Pin
             </Link>
             <Link 
-              to="/state-maps" 
+              href="/state-maps" 
               className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block"
             >
               State Maps
             </Link>
             <Link 
-              to="/blog" 
+              href="/blog" 
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               Blog
@@ -374,12 +375,12 @@ const DropPin = () => {
               </div>
             ) : (
               <div className="bg-secondary/50 border border-border rounded-xl p-6 text-center">
-                <p className="text-foreground font-medium mb-2">⚠️ Could not determine postal code</p>
+                <p className="text-foreground font-medium mb-2">Could not determine postal code</p>
                 <p className="text-sm text-muted-foreground mb-4">
                   This area may not have an assigned postal code, or it's in a remote location.
                 </p>
                 <Button asChild variant="outline">
-                  <Link to="/">
+                  <Link href="/">
                     <Search className="h-4 w-4 mr-2" />
                     Try Manual Search Instead
                   </Link>
@@ -400,7 +401,7 @@ const DropPin = () => {
               <h4 className="font-semibold text-foreground mb-2">GPS Detection</h4>
               <p className="text-sm text-muted-foreground mb-4">Let us detect your location automatically</p>
               <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                <Link to="/">Use GPS</Link>
+                <Link href="/">Use GPS</Link>
               </Button>
             </div>
             
@@ -411,7 +412,7 @@ const DropPin = () => {
               <h4 className="font-semibold text-foreground mb-2">Manual Search</h4>
               <p className="text-sm text-muted-foreground mb-4">Select your location from dropdowns</p>
               <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                <Link to="/">Manual Search</Link>
+                <Link href="/">Manual Search</Link>
               </Button>
             </div>
           </div>
@@ -423,7 +424,7 @@ const DropPin = () => {
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="col-span-1 sm:col-span-2 lg:col-span-1">
-              <Link to="/" className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
+              <Link href="/" className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
                 <div className="p-1.5 bg-primary/20 rounded-lg">
                   <MapPin className="h-4 w-4 text-primary" />
                 </div>
@@ -437,17 +438,17 @@ const DropPin = () => {
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-4">Quick Links</h4>
               <nav className="flex flex-col gap-3">
-                <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Home</Link>
-                <Link to="/drop-pin" className="text-sm text-muted-foreground hover:text-primary transition-colors">Drop Pin</Link>
-                <Link to="/state-maps" className="text-sm text-muted-foreground hover:text-primary transition-colors">State Maps</Link>
-                <Link to="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</Link>
+                <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Home</Link>
+                <Link href="/drop-pin" className="text-sm text-muted-foreground hover:text-primary transition-colors">Drop Pin</Link>
+                <Link href="/state-maps" className="text-sm text-muted-foreground hover:text-primary transition-colors">State Maps</Link>
+                <Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</Link>
               </nav>
             </div>
 
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-4">Resources</h4>
               <nav className="flex flex-col gap-3">
-                <Link to="/blog/nipost-services-guide" className="text-sm text-muted-foreground hover:text-primary transition-colors">NIPOST Guide</Link>
+                <Link href="/blog/nipost-services-guide" className="text-sm text-muted-foreground hover:text-primary transition-colors">NIPOST Guide</Link>
               </nav>
             </div>
 
@@ -461,7 +462,7 @@ const DropPin = () => {
 
           <div className="border-t border-border/50 mt-8 pt-6">
             <p className="text-sm text-muted-foreground text-center sm:text-left">
-              © {new Date().getFullYear()} AI-based Nigeria Zip Postal Code Finder. All rights reserved.
+              (c) {new Date().getFullYear()} AI-based Nigeria Zip Postal Code Finder. All rights reserved.
             </p>
           </div>
         </div>

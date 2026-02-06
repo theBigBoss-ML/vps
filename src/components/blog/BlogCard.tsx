@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { Calendar, Clock, ArrowRight, Tag } from 'lucide-react';
 import { BlogPost } from '@/types/blog';
 import { Badge } from '@/components/ui/badge';
@@ -23,7 +23,7 @@ export function BlogCard({ post }: BlogCardProps) {
             {post.category}
           </Badge>
         </div>
-        <Link to={`/blog/${post.slug}`}>
+        <Link href={`/blog/${post.slug}`}>
           <h3 className="text-lg font-semibold leading-tight text-foreground group-hover:text-primary transition-colors line-clamp-2">
             {post.title}
           </h3>
@@ -51,7 +51,7 @@ export function BlogCard({ post }: BlogCardProps) {
         </div>
         
         <Link 
-          to={`/blog/${post.slug}`}
+          href={`/blog/${post.slug}`}
           className="flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors self-start"
         >
           Read article

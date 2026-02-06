@@ -166,7 +166,12 @@ export function matchAddressToPostalCode(
 }
 
 // Extract components from Google address
-export function extractAddressComponents(addressComponents: any[]): {
+export type AddressComponent = {
+  long_name: string;
+  types: string[];
+};
+
+export function extractAddressComponents(addressComponents: AddressComponent[]): {
   lga: string | null;
   area: string | null;
   street: string | null;

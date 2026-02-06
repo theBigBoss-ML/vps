@@ -1,16 +1,17 @@
+"use client";
+
+import dynamic from 'next/dynamic';
 import { useState, useCallback, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { MapPin, Search, Sparkles, AlertTriangle } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LocationButton } from '@/components/finder/LocationButton';
-import { PostalCodeDisplay } from '@/components/finder/PostalCodeDisplay';
 import { SmartSearch } from '@/components/finder/SmartSearch';
 import { ManualSearch } from '@/components/finder/ManualSearch';
 import { RecentLocations } from '@/components/finder/RecentLocations';
 import { ErrorMessage } from '@/components/finder/ErrorMessage';
 import { LoadingState } from '@/components/finder/LoadingState';
 import { ThemeToggle } from '@/components/finder/ThemeToggle';
-import { ApiKeySettings, getStoredApiKey } from '@/components/finder/ApiKeySettings';
 import { UsageStatsDisplay } from '@/components/finder/UsageStatsDisplay';
 import { LocationPermissionModal } from '@/components/finder/LocationPermissionModal';
 import { useGeolocation } from '@/hooks/useGeolocation';
@@ -25,13 +26,17 @@ import { toast } from 'sonner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 
+const PostalCodeDisplay = dynamic(
+  () => import('@/components/finder/PostalCodeDisplay').then((mod) => mod.PostalCodeDisplay),
+  { ssr: false }
+);
+
 const Index = () => {
   const [status, setStatus] = useState<LookupStatus>('idle');
   const [result, setResult] = useState<LocationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('gps');
   
-  const [apiKeyVersion, setApiKeyVersion] = useState(0);
   const { getCurrentPosition, error: geoError, clearError, accuracy, accuracyLevel } = useGeolocation();
   const { recentLocations, addRecentLocation, clearRecentLocations } = useRecentLocations();
   const { theme, toggleTheme } = useTheme();
@@ -51,12 +56,6 @@ const Index = () => {
     }
   }, [permissionStatus]);
 
-  const getApiKey = (): string => {
-    // Force re-read when apiKeyVersion changes
-    void apiKeyVersion;
-    return getStoredApiKey();
-  };
-
   const handleDetectLocation = useCallback(async () => {
     setError(null);
     setResult(null);
@@ -70,31 +69,33 @@ const Index = () => {
     }
 
     setStatus('geocoding');
-    const apiKey = getApiKey();
-    
-    if (!apiKey) {
+    try {
+      const locationResult = await rateLimitedGetPostalCode(coords.lat, coords.lng);
+      if (locationResult) {
+        setResult(locationResult);
+        setStatus('success');
+        addRecentLocation({
+          postalCode: locationResult.postalCode,
+          address: locationResult.address,
+          area: locationResult.area,
+          lga: locationResult.lga,
+        });
+        trackStat('generation', locationResult.postalCode);
+        toast.success('Postal code found!');
+        return;
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : 'Google Maps lookup is currently unavailable.';
       setStatus('error');
-      setError('Please configure your Google Maps API key in Settings (gear icon in header).');
+      setError(message);
       return;
     }
 
-    const locationResult = await rateLimitedGetPostalCode(coords.lat, coords.lng, apiKey);
-    
-    if (locationResult) {
-      setResult(locationResult);
-      setStatus('success');
-      addRecentLocation({
-        postalCode: locationResult.postalCode,
-        address: locationResult.address,
-        area: locationResult.area,
-        lga: locationResult.lga,
-      });
-      trackStat('generation', locationResult.postalCode);
-      toast.success('Postal code found!');
-    } else {
-      setStatus('error');
-      setError('Could not find postal code for your location. Try manual search.');
-    }
+    setStatus('error');
+    setError('Could not find postal code for your location. Try manual search.');
   }, [getCurrentPosition, geoError, addRecentLocation, trackStat]);
 
   const handleSmartSearch = useCallback((result: PostalCode) => {
@@ -194,7 +195,7 @@ const Index = () => {
 
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-xl sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="p-2 bg-primary/20 rounded-xl">
               <MapPin className="h-6 w-6 text-primary" aria-hidden="true" />
             </div>
@@ -205,24 +206,23 @@ const Index = () => {
           </Link>
           <nav className="flex items-center gap-4">
             <Link 
-              to="/drop-pin" 
+              href="/drop-pin" 
               className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block"
             >
               Drop Pin
             </Link>
             <Link 
-              to="/state-maps" 
+              href="/state-maps" 
               className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block"
             >
               State Maps
             </Link>
             <Link 
-              to="/blog" 
+              href="/blog" 
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               Blog
             </Link>
-            <ApiKeySettings onKeyUpdate={() => setApiKeyVersion(v => v + 1)} />
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
           </nav>
         </div>
@@ -249,7 +249,7 @@ const Index = () => {
                 Find Your Nigeria Zip Postal Code
               </h2>
               <p className="text-muted-foreground text-sm">
-                AI-based Nigeria zip postal code finder — instant lookup using GPS or smart search
+                AI-based Nigeria zip postal code finder - instant lookup using GPS or smart search
               </p>
             </div>
 
@@ -351,7 +351,7 @@ const Index = () => {
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="col-span-1 sm:col-span-2 lg:col-span-1">
-              <Link to="/" className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
+              <Link href="/" className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
                 <div className="p-1.5 bg-primary/20 rounded-lg">
                   <MapPin className="h-4 w-4 text-primary" />
                 </div>
@@ -366,10 +366,10 @@ const Index = () => {
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-4">Quick Links</h4>
               <nav className="flex flex-col gap-3">
-                <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Home</Link>
-                <Link to="/drop-pin" className="text-sm text-muted-foreground hover:text-primary transition-colors">Drop Pin</Link>
-                <Link to="/state-maps" className="text-sm text-muted-foreground hover:text-primary transition-colors">State Maps</Link>
-                <Link to="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</Link>
+                <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Home</Link>
+                <Link href="/drop-pin" className="text-sm text-muted-foreground hover:text-primary transition-colors">Drop Pin</Link>
+                <Link href="/state-maps" className="text-sm text-muted-foreground hover:text-primary transition-colors">State Maps</Link>
+                <Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</Link>
               </nav>
             </div>
 
@@ -377,7 +377,7 @@ const Index = () => {
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-4">Resources</h4>
               <nav className="flex flex-col gap-3">
-                <Link to="/blog/nipost-services-guide" className="text-sm text-muted-foreground hover:text-primary transition-colors">NIPOST Guide</Link>
+                <Link href="/blog/nipost-services-guide" className="text-sm text-muted-foreground hover:text-primary transition-colors">NIPOST Guide</Link>
               </nav>
             </div>
 
@@ -393,7 +393,7 @@ const Index = () => {
           {/* Copyright */}
           <div className="border-t border-border/50 mt-8 pt-6">
             <p className="text-sm text-muted-foreground text-center sm:text-left">
-              © {new Date().getFullYear()} AI-based Nigeria Zip Postal Code Finder. All rights reserved.
+              (c) {new Date().getFullYear()} AI-based Nigeria Zip Postal Code Finder. All rights reserved.
             </p>
           </div>
         </div>

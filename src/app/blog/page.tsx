@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom';
+"use client";
+
+import Link from 'next/link';
 import { ArrowLeft, BookOpen, Search } from 'lucide-react';
 import { getAllBlogPosts } from '@/data/blogPosts';
 import { BlogCard } from '@/components/blog/BlogCard';
@@ -24,7 +26,7 @@ export default function Blog() {
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
+          <Link href="/" className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
             <ArrowLeft className="h-4 w-4" />
             <span className="font-semibold">Nigeria Zip Code</span>
           </Link>
@@ -82,7 +84,7 @@ export default function Blog() {
             Use our AI-based Nigeria zip postal code finder to get your postal code instantly.
           </p>
           <Link
-            to="/"
+            href="/"
             className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
           >
             Find Your Postal Code
@@ -94,7 +96,7 @@ export default function Blog() {
       {/* Footer */}
       <footer className="border-t border-border/50 py-8 mt-12">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} AI-based Nigeria Zip Postal Code Finder. All rights reserved.</p>
+          <p>(c) {new Date().getFullYear()} AI-based Nigeria Zip Postal Code Finder. All rights reserved.</p>
         </div>
       </footer>
     </div>

@@ -1,6 +1,8 @@
-import { useParams, Link, Navigate } from 'react-router-dom';
+"use client";
+
+import Link from 'next/link';
 import { ArrowLeft, Calendar, Clock, User, Tag, Share2, ChevronRight } from 'lucide-react';
-import { getBlogPostBySlug, getAllBlogPosts } from '@/data/blogPosts';
+import { BlogPost } from '@/types/blog';
 import { TableOfContents } from '@/components/blog/TableOfContents';
 import { BlogContent } from '@/components/blog/BlogContent';
 import { ThemeToggle } from '@/components/finder/ThemeToggle';
@@ -9,16 +11,13 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useTheme } from '@/hooks/useTheme';
 
-export default function BlogPost() {
-  const { slug } = useParams<{ slug: string }>();
-  const { theme, toggleTheme } = useTheme();
-  const post = slug ? getBlogPostBySlug(slug) : undefined;
-  const allPosts = getAllBlogPosts();
-  const relatedPosts = allPosts.filter((p) => p.slug !== slug).slice(0, 2);
+interface BlogPostClientProps {
+  post: BlogPost;
+  relatedPosts: BlogPost[];
+}
 
-  if (!post) {
-    return <Navigate to="/blog" replace />;
-  }
+export default function BlogPostClient({ post, relatedPosts }: BlogPostClientProps) {
+  const { theme, toggleTheme } = useTheme();
 
   const formattedDate = new Date(post.publishedAt).toLocaleDateString('en-NG', {
     year: 'numeric',
@@ -50,12 +49,12 @@ export default function BlogPost() {
       <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link to="/" className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
+            <Link href="/" className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
               <ArrowLeft className="h-4 w-4" />
               <span className="font-semibold hidden sm:inline">Nigeria Zip Code</span>
             </Link>
             <span className="text-muted-foreground">/</span>
-            <Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="/blog" className="text-muted-foreground hover:text-foreground transition-colors">
               Blog
             </Link>
           </div>
@@ -66,9 +65,9 @@ export default function BlogPost() {
       <main className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
-          <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
+          <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
           <ChevronRight className="h-4 w-4" />
-          <Link to="/blog" className="hover:text-foreground transition-colors">Blog</Link>
+          <Link href="/blog" className="hover:text-foreground transition-colors">Blog</Link>
           <ChevronRight className="h-4 w-4" />
           <span className="text-foreground truncate max-w-[200px]">{post.title}</span>
         </nav>
@@ -150,7 +149,7 @@ export default function BlogPost() {
                 Use our AI-based Nigeria zip postal code finder to locate your postal code instantly.
               </p>
               <Link
-                to="/"
+                href="/"
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
               >
                 Find Postal Code
@@ -172,7 +171,7 @@ export default function BlogPost() {
                     {relatedPosts.map((relatedPost) => (
                       <Link
                         key={relatedPost.id}
-                        to={`/blog/${relatedPost.slug}`}
+                        href={`/blog/${relatedPost.slug}`}
                         className="block p-3 rounded-lg hover:bg-muted/50 transition-colors"
                       >
                         <h5 className="text-sm font-medium text-foreground line-clamp-2">
@@ -194,7 +193,7 @@ export default function BlogPost() {
       {/* Footer */}
       <footer className="border-t border-border/50 py-8 mt-12">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} AI-based Nigeria Zip Postal Code Finder. All rights reserved.</p>
+          <p>(c) {new Date().getFullYear()} AI-based Nigeria Zip Postal Code Finder. All rights reserved.</p>
         </div>
       </footer>
     </div>

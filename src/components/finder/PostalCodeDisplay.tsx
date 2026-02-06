@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { LocationResult } from '@/types/location';
 import { toast } from 'sonner';
 import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import {
   Accordion,
   AccordionContent,
@@ -56,7 +55,7 @@ export function PostalCodeDisplay({ result, onReset, onCopy, onFeedback }: Posta
     });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap'
+      attribution: '&copy; OpenStreetMap'
     }).addTo(map);
 
     // Custom marker icon
@@ -109,7 +108,7 @@ export function PostalCodeDisplay({ result, onReset, onCopy, onFeedback }: Posta
       url: window.location.href,
     };
 
-    if (navigator.share && navigator.canShare(shareData)) {
+    if (navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
       try {
         await navigator.share(shareData);
         toast.success('Shared successfully!');
@@ -290,7 +289,7 @@ export function PostalCodeDisplay({ result, onReset, onCopy, onFeedback }: Posta
                       style={{ minHeight: '128px' }}
                     />
                     <div className="absolute bottom-1 right-1 bg-background/80 backdrop-blur-sm px-1.5 py-0.5 rounded text-[10px] text-muted-foreground">
-                      © OpenStreetMap
+                      (c) OpenStreetMap
                     </div>
                   </div>
                 )}
