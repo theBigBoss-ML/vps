@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Copy, Check, Share2, MapPin, Database, RefreshCw, Info, ThumbsUp, ThumbsDown, Navigation } from 'lucide-react';
+import { Copy, Check, ShareNetwork, MapPin, Database, ArrowClockwise, Info, ThumbsUp, ThumbsDown, NavigationArrow } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { LocationResult } from '@/types/location';
 import { toast } from 'sonner';
@@ -272,7 +272,7 @@ export function PostalCodeDisplay({ result, onReset, onCopy, onFeedback }: Posta
           <div className="mt-3 p-3 rounded-lg bg-gradient-to-r from-warning/10 to-warning/5 border border-warning/20">
             <div className="flex items-start gap-2.5">
               <div className="p-1.5 rounded-md bg-warning/20 shrink-0">
-                <Navigation className="h-3.5 w-3.5 text-warning" aria-hidden="true" />
+                <NavigationArrow className="h-3.5 w-3.5 text-warning" aria-hidden="true" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-warning mb-1">Nearest Address to Your Location</p>
@@ -317,7 +317,7 @@ export function PostalCodeDisplay({ result, onReset, onCopy, onFeedback }: Posta
           className="flex-1 gap-2"
           aria-label="Share postal code"
         >
-          <Share2 className="h-4 w-4" aria-hidden="true" />
+          <ShareNetwork className="h-4 w-4" aria-hidden="true" />
           Share
         </Button>
         <Button
@@ -326,7 +326,7 @@ export function PostalCodeDisplay({ result, onReset, onCopy, onFeedback }: Posta
           className="flex-1 gap-2"
           aria-label="Find another postal code"
         >
-          <RefreshCw className="h-4 w-4" aria-hidden="true" />
+          <ArrowClockwise className="h-4 w-4" aria-hidden="true" />
           Search Again
         </Button>
       </div>

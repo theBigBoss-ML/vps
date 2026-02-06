@@ -1,4 +1,4 @@
-import { MapPin, Loader2, Crosshair, Info } from 'lucide-react';
+import { MapPin, SpinnerGap, Crosshair, Info } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -73,7 +73,7 @@ export function LocationButton({ onDetect, isLoading, disabled, accuracy, accura
       >
         {isLoading ? (
           <>
-            <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
+            <SpinnerGap className="h-6 w-6 animate-spin" aria-hidden="true" />
             <span>Getting Precise Location...</span>
           </>
         ) : (

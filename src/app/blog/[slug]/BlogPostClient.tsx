@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { ArrowLeft, Calendar, Clock, User, Tag, Share2, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, User, Tag, ShareNetwork, CaretRight } from '@phosphor-icons/react';
 import { BlogPost } from '@/types/blog';
 import { TableOfContents } from '@/components/blog/TableOfContents';
 import { BlogContent } from '@/components/blog/BlogContent';
@@ -66,9 +66,9 @@ export default function BlogPostClient({ post, relatedPosts }: BlogPostClientPro
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
           <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
-          <ChevronRight className="h-4 w-4" />
+          <CaretRight className="h-4 w-4" />
           <Link href="/blog" className="hover:text-foreground transition-colors">Blog</Link>
-          <ChevronRight className="h-4 w-4" />
+          <CaretRight className="h-4 w-4" />
           <span className="text-foreground truncate max-w-[200px]">{post.title}</span>
         </nav>
 
@@ -114,7 +114,7 @@ export default function BlogPostClient({ post, relatedPosts }: BlogPostClientPro
                   onClick={handleShare}
                   className="ml-auto"
                 >
-                  <Share2 className="h-4 w-4 mr-2" />
+                  <ShareNetwork className="h-4 w-4 mr-2" />
                   Share
                 </Button>
               </div>

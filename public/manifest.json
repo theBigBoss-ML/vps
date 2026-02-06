@@ -1,7 +1,7 @@
 {
   "name": "Nigerian Postal Code Finder",
   "short_name": "PostCode NG",
-  "description": "Find your Nigerian postal code instantly using GPS",
+  "description": "AI-based Nigerian postal code finder using GPS or smart search",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0f14",

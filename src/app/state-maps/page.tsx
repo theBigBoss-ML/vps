@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { MapPin, Map, Download, ZoomIn, ZoomOut, RotateCcw, Loader2, Info, Navigation, Check, ChevronsUpDown, ExternalLink } from 'lucide-react';
+import { MapPin, MapTrifold, DownloadSimple, MagnifyingGlassPlus, MagnifyingGlassMinus, ArrowCounterClockwise, SpinnerGap, Info, NavigationArrow, Check, CaretUpDown, ArrowSquareOut } from '@phosphor-icons/react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -143,7 +143,7 @@ const StateMaps = () => {
             </div>
             <div>
               <h1 className="text-lg font-bold text-foreground">AI-based Nigeria Zip Postal Code Finder</h1>
-              <p className="text-xs text-muted-foreground hidden sm:block">Free & fast Nigeria zip postal code lookup</p>
+              <p className="text-xs text-muted-foreground hidden sm:block">AI-based, free & fast Nigeria zip postal code lookup</p>
             </div>
           </Link>
           <nav className="flex items-center gap-4">
@@ -175,14 +175,14 @@ const StateMaps = () => {
         {/* Page Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-accent/20 text-accent-foreground text-xs font-medium rounded-full mb-4 border border-primary/30">
-            <Map className="h-3 w-3 text-primary" />
+            <MapTrifold className="h-3 w-3 text-primary" />
             <span className="text-primary font-semibold">Official NIPOST Maps</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
-            State Postal Code Finder (by Map)
+            State Postal Code Finder
           </h2>
           <p className="text-muted-foreground text-sm md:text-base max-w-2xl mx-auto">
-            View official NIPOST maps showing postal codes for any Nigerian state. 
+            AI-assisted access to official NIPOST maps showing postal codes for any Nigerian state. 
             Zoom and pan to explore postal codes for specific areas.
           </p>
         </div>
@@ -217,7 +217,7 @@ const StateMaps = () => {
                   {selectedState
                     ? stateMapData.find((state) => state.id === selectedState)?.name
                     : "-- Choose a State --"}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <CaretUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-full sm:w-[280px] p-0 bg-popover border border-border z-50" align="start">
@@ -253,9 +253,9 @@ const StateMaps = () => {
             className="w-full sm:w-auto gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             {isLoadingMap ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <SpinnerGap className="h-4 w-4 animate-spin" />
             ) : (
-              <Map className="h-4 w-4" />
+              <MapTrifold className="h-4 w-4" />
             )}
             View Map
           </Button>
@@ -297,7 +297,7 @@ const StateMaps = () => {
         {/* Loading State */}
         {isLoadingMap && !imageError && (
           <div className="flex flex-col items-center justify-center py-16 gap-4">
-            <Loader2 className="h-12 w-12 text-primary animate-spin" />
+            <SpinnerGap className="h-12 w-12 text-primary animate-spin" />
             <p className="text-muted-foreground">Loading {selectedStateName} postal code map...</p>
           </div>
         )}
@@ -306,7 +306,7 @@ const StateMaps = () => {
         {imageError && (
           <div className="p-6 rounded-xl bg-destructive/10 border border-destructive/20 text-center space-y-4">
             <div className="flex flex-col items-center gap-2">
-              <Map className="h-10 w-10 text-destructive/60" />
+              <MapTrifold className="h-10 w-10 text-destructive/60" />
               <p className="text-destructive font-medium">Failed to load the map image.</p>
               <p className="text-sm text-muted-foreground">
                 The archive server may be temporarily unavailable. Try opening in a new tab.
@@ -314,11 +314,11 @@ const StateMaps = () => {
             </div>
             <div className="flex flex-wrap gap-3 justify-center">
               <Button variant="outline" onClick={loadMap}>
-                <RotateCcw className="h-4 w-4 mr-2" />
+                <ArrowCounterClockwise className="h-4 w-4 mr-2" />
                 Try Again
               </Button>
               <Button onClick={openInNewTab} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                <ExternalLink className="h-4 w-4 mr-2" />
+                <ArrowSquareOut className="h-4 w-4 mr-2" />
                 Open in New Tab
               </Button>
             </div>
@@ -354,7 +354,7 @@ const StateMaps = () => {
                         onClick={() => zoomIn()}
                         className="gap-2"
                       >
-                        <ZoomIn className="h-4 w-4" />
+                        <MagnifyingGlassPlus className="h-4 w-4" />
                         Zoom In
                       </Button>
                       <Button 
@@ -363,7 +363,7 @@ const StateMaps = () => {
                         onClick={() => zoomOut()}
                         className="gap-2"
                       >
-                        <ZoomOut className="h-4 w-4" />
+                        <MagnifyingGlassMinus className="h-4 w-4" />
                         Zoom Out
                       </Button>
                       <Button 
@@ -372,7 +372,7 @@ const StateMaps = () => {
                         onClick={() => resetTransform()}
                         className="gap-2"
                       >
-                        <RotateCcw className="h-4 w-4" />
+                        <ArrowCounterClockwise className="h-4 w-4" />
                         Reset
                       </Button>
                       <Button 
@@ -381,7 +381,7 @@ const StateMaps = () => {
                         onClick={downloadMap}
                         className="gap-2"
                       >
-                        <Download className="h-4 w-4" />
+                        <DownloadSimple className="h-4 w-4" />
                         Download
                       </Button>
                     </div>
@@ -449,7 +449,7 @@ const StateMaps = () => {
                     onClick={resetView}
                     className="gap-2"
                   >
-                    <RotateCcw className="h-4 w-4" />
+                    <ArrowCounterClockwise className="h-4 w-4" />
                     View Different State
                   </Button>
                   <Button 
@@ -457,7 +457,7 @@ const StateMaps = () => {
                     className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
                   >
                     <Link href="/">
-                      <Navigation className="h-4 w-4" />
+                      <NavigationArrow className="h-4 w-4" />
                       Use GPS Detection Instead
                     </Link>
                   </Button>
@@ -481,7 +481,7 @@ const StateMaps = () => {
                 <h3 className="text-sm font-bold text-foreground">AI-based Nigeria Zip Postal Code Finder</h3>
               </Link>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Free & fast Nigeria zip postal code lookup using GPS or smart search.
+                AI-based Nigeria zip postal code lookup using GPS or smart search.
               </p>
             </div>
 

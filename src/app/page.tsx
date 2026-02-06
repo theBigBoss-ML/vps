@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
-import { MapPin, Search, Sparkles, AlertTriangle } from 'lucide-react';
+import { MapPin, MagnifyingGlass, Compass, Warning } from '@phosphor-icons/react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LocationButton } from '@/components/finder/LocationButton';
 import { SmartSearch } from '@/components/finder/SmartSearch';
@@ -201,7 +201,7 @@ const Index = () => {
             </div>
             <div>
               <h1 className="text-lg font-bold text-foreground">AI-based Nigeria Zip Postal Code Finder</h1>
-              <p className="text-xs text-muted-foreground hidden sm:block">Free & fast Nigeria zip postal code lookup</p>
+              <p className="text-xs text-muted-foreground hidden sm:block">AI-based, free & fast Nigeria zip postal code lookup</p>
             </div>
           </Link>
           <nav className="flex items-center gap-4">
@@ -242,14 +242,14 @@ const Index = () => {
           <div className="space-y-8">
             <div className="text-center space-y-3">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full">
-                <Sparkles className="h-3 w-3" />
-                AI-Powered
+                <Compass className="h-3 w-3" />
+                AI-assisted GPS + Smart Search
               </div>
               <h2 className="text-2xl font-bold text-foreground">
                 Find Your Nigeria Zip Postal Code
               </h2>
               <p className="text-muted-foreground text-sm">
-                AI-based Nigeria zip postal code finder - instant lookup using GPS or smart search
+                AI-based Nigeria zip postal code finder for instant lookup using GPS or smart search
               </p>
             </div>
 
@@ -263,7 +263,7 @@ const Index = () => {
             {/* Location denied banner */}
             {permissionStatus === 'denied' && (
               <Alert className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
-                <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                <Warning className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                 <AlertDescription className="text-sm text-amber-800 dark:text-amber-200">
                   Location access is disabled. 
                   <Button 
@@ -288,7 +288,7 @@ const Index = () => {
                   )}
                 </TabsTrigger>
                 <TabsTrigger value="manual" className="gap-2 h-10">
-                  <Search className="h-4 w-4" aria-hidden="true" />
+                  <MagnifyingGlass className="h-4 w-4" aria-hidden="true" />
                   Manual
                 </TabsTrigger>
               </TabsList>
@@ -310,7 +310,7 @@ const Index = () => {
               <TabsContent value="manual" className="space-y-6">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Search className="h-4 w-4 text-primary" />
+                    <MagnifyingGlass className="h-4 w-4 text-primary" />
                     <span className="text-sm font-medium text-foreground">Search by Location Name</span>
                   </div>
                   <SmartSearch onSelect={handleSmartSearch} isLoading={isLoading} />
@@ -358,7 +358,7 @@ const Index = () => {
                 <h3 className="text-sm font-bold text-foreground">AI-based Nigeria Zip Postal Code Finder</h3>
               </Link>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Free & fast Nigeria zip postal code lookup using GPS or smart search.
+                AI-based Nigeria zip postal code lookup using GPS or smart search.
               </p>
             </div>
 

@@ -1,4 +1,4 @@
-import { Loader2 } from 'lucide-react';
+import { SpinnerGap } from '@phosphor-icons/react';
 import { LookupStatus } from '@/types/location';
 
 interface LoadingStateProps {
@@ -27,7 +27,7 @@ export function LoadingState({ status }: LoadingStateProps) {
       <div className="relative">
         <div className="absolute inset-0 rounded-full bg-nigeria-green/20 animate-ping" />
         <div className="relative p-4 rounded-full bg-nigeria-green/10">
-          <Loader2 className="h-8 w-8 text-nigeria-green animate-spin" aria-hidden="true" />
+          <SpinnerGap className="h-8 w-8 text-nigeria-green animate-spin" aria-hidden="true" />
         </div>
       </div>
       <p className="mt-4 text-muted-foreground font-medium">

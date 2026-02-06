@@ -1,4 +1,4 @@
-import { Clock, Trash2, MapPin } from 'lucide-react';
+import { Clock, Trash, MapPin } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { RecentLocation } from '@/types/location';
 
@@ -27,7 +27,7 @@ export function RecentLocations({ locations, onSelect, onClear }: RecentLocation
           className="text-xs text-muted-foreground hover:text-destructive"
           aria-label="Clear recent searches"
         >
-          <Trash2 className="h-3 w-3 mr-1" aria-hidden="true" />
+          <Trash className="h-3 w-3 mr-1" aria-hidden="true" />
           Clear
         </Button>
       </div>

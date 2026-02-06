@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, ChevronDown } from 'lucide-react';
+import { MagnifyingGlass } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import {
@@ -91,7 +91,7 @@ export function ManualSearch({ onSearch, isLoading }: ManualSearchProps) {
         className="w-full h-12 gap-2 bg-nigeria-green hover:bg-nigeria-green/90"
         aria-label="Search for postal code"
       >
-        <Search className="h-5 w-5" aria-hidden="true" />
+        <MagnifyingGlass className="h-5 w-5" aria-hidden="true" />
         Find Postal Code
       </Button>
     </div>

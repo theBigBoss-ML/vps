@@ -1,4 +1,4 @@
-import { MapPin, Navigation, Shield, Zap, X, ChevronRight, Smartphone, Monitor, AlertTriangle } from 'lucide-react';
+import { MapPin, NavigationArrow, Shield, Lightning, X, CaretRight, DeviceMobile, Monitor, Warning } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -7,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
 import { LocationPermissionStatus } from '@/hooks/useLocationPermission';
 
 interface LocationPermissionModalProps {
@@ -45,7 +44,7 @@ function EnableInstructions() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
-        <AlertTriangle className="h-5 w-5" />
+        <Warning className="h-5 w-5" />
         <span className="font-medium text-sm">Location access was denied</span>
       </div>
       
@@ -57,7 +56,7 @@ function EnableInstructions() {
         {isIOS ? (
           <>
             <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-              <Smartphone className="h-4 w-4" />
+              <DeviceMobile className="h-4 w-4" />
               <span>iPhone/iPad Instructions</span>
             </div>
             <ol className="text-xs text-muted-foreground space-y-2 list-decimal list-inside">
@@ -71,7 +70,7 @@ function EnableInstructions() {
         ) : isAndroid ? (
           <>
             <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-              <Smartphone className="h-4 w-4" />
+              <DeviceMobile className="h-4 w-4" />
               <span>Android Instructions</span>
             </div>
             <ol className="text-xs text-muted-foreground space-y-2 list-decimal list-inside">
@@ -157,12 +156,12 @@ export function LocationPermissionModal({
               {/* Benefits */}
               <div className="space-y-4">
                 <FeatureItem 
-                  icon={Navigation}
+                  icon={NavigationArrow}
                   title="Instant GPS Location"
                   description="One-tap postal code lookup using your device's GPS"
                 />
                 <FeatureItem 
-                  icon={Zap}
+                  icon={Lightning}
                   title="High Accuracy"
                   description="GPS provides the most accurate location data"
                 />
@@ -181,7 +180,7 @@ export function LocationPermissionModal({
                 >
                   <MapPin className="h-5 w-5" />
                   Enable Location Access
-                  <ChevronRight className="h-4 w-4 ml-auto" />
+                  <CaretRight className="h-4 w-4 ml-auto" />
                 </Button>
                 
                 <Button 

@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Search, MapPin, X, Loader2 } from 'lucide-react';
+import { MagnifyingGlass, MapPin, X, SpinnerGap } from '@phosphor-icons/react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { PostalCode } from '@/data/postalCodes';
@@ -199,7 +199,7 @@ export function SmartSearch({ onSelect, isLoading }: SmartSearchProps) {
       <div className="relative group">
         <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 via-nigeria-green/40 to-primary/50 rounded-xl blur-md opacity-75 group-hover:opacity-100 animate-pulse transition-opacity duration-500" />
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
+          <MagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10" />
           <Input
             ref={inputRef}
             type="text"
@@ -226,7 +226,7 @@ export function SmartSearch({ onSelect, isLoading }: SmartSearchProps) {
             disabled={isFetchingPlaces}
           >
             {isFetchingPlaces ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <SpinnerGap className="h-4 w-4 animate-spin" />
             ) : (
               <X className="h-4 w-4" />
             )}

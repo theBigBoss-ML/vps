@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { ArrowLeft, BookOpen, Search } from 'lucide-react';
+import { ArrowLeft, BookOpen, MagnifyingGlass } from '@phosphor-icons/react';
 import { getAllBlogPosts } from '@/data/blogPosts';
 import { BlogCard } from '@/components/blog/BlogCard';
 import { ThemeToggle } from '@/components/finder/ThemeToggle';
@@ -51,7 +51,7 @@ export default function Blog() {
 
           {/* Search */}
           <div className="relative max-w-md mx-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Search articles..."

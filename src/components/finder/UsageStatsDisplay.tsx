@@ -1,4 +1,4 @@
-import { Zap, ThumbsUp, Copy } from 'lucide-react';
+import { Lightning, ThumbsUp, Copy } from '@phosphor-icons/react';
 
 interface UsageStatsDisplayProps {
   generations: number;
@@ -40,7 +40,7 @@ export function UsageStatsDisplay({ generations, likes, copies, loading }: Usage
         <div className="grid grid-cols-3 gap-4 sm:gap-8">
           <div className="flex flex-col items-center gap-2">
             <div className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-nigeria-green" />
+              <Lightning className="h-5 w-5 text-nigeria-green" />
               <span className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">{formatNumber(generations)}</span>
             </div>
             <span className="text-xs sm:text-sm text-muted-foreground text-center">Codes Generated</span>

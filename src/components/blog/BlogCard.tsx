@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Calendar, Clock, ArrowRight, Tag } from 'lucide-react';
+import { Calendar, Clock, ArrowRight, Tag } from '@phosphor-icons/react';
 import { BlogPost } from '@/types/blog';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';

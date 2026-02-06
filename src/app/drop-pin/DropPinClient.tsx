@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { MapPin, Copy, Share2, Star, Navigation, Search, Loader2, MapPinned, Trash2 } from 'lucide-react';
+import { MapPin, Copy, ShareNetwork, Star, NavigationArrow, MagnifyingGlass, SpinnerGap, MapPinLine, Trash } from '@phosphor-icons/react';
 import L from 'leaflet';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/finder/ThemeToggle';
@@ -220,7 +220,7 @@ const DropPin = () => {
             </div>
             <div>
               <h1 className="text-lg font-bold text-foreground">AI-based Nigeria Zip Postal Code Finder</h1>
-              <p className="text-xs text-muted-foreground hidden sm:block">Free & fast Nigeria zip postal code lookup</p>
+              <p className="text-xs text-muted-foreground hidden sm:block">AI-based, free & fast Nigeria zip postal code lookup</p>
             </div>
           </Link>
           <nav className="flex items-center gap-4">
@@ -257,7 +257,7 @@ const DropPin = () => {
         {/* Page Header */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-accent/20 text-accent-foreground text-xs font-medium rounded-full mb-4 border border-primary/30">
-            <MapPinned className="h-3 w-3 text-primary" />
+            <MapPinLine className="h-3 w-3 text-primary" />
             <span className="text-primary font-semibold">Interactive Map</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
@@ -290,7 +290,7 @@ const DropPin = () => {
         {/* Loading Overlay */}
         {loading && (
           <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center z-[2000]">
-            <Loader2 className="h-12 w-12 text-primary animate-spin mb-4" />
+            <SpinnerGap className="h-12 w-12 text-primary animate-spin mb-4" />
             <p className="text-foreground font-medium">Finding postal code...</p>
           </div>
         )}
@@ -308,7 +308,7 @@ const DropPin = () => {
         {pins.length > 0 && (
           <div className="flex justify-center mb-6">
             <Button variant="outline" onClick={clearAllPins} className="gap-2">
-              <Trash2 className="h-4 w-4" />
+              <Trash className="h-4 w-4" />
               Clear All Pins ({pins.length})
             </Button>
           </div>
@@ -360,7 +360,7 @@ const DropPin = () => {
                     Copy Code
                   </Button>
                   <Button variant="outline" onClick={() => sharePostalCode(currentPin)} className="gap-2">
-                    <Share2 className="h-4 w-4" />
+                    <ShareNetwork className="h-4 w-4" />
                     Share
                   </Button>
                   <Button variant="outline" onClick={() => saveToFavorites(currentPin)} className="gap-2">
@@ -381,7 +381,7 @@ const DropPin = () => {
                 </p>
                 <Button asChild variant="outline">
                   <Link href="/">
-                    <Search className="h-4 w-4 mr-2" />
+                    <MagnifyingGlass className="h-4 w-4 mr-2" />
                     Try Manual Search Instead
                   </Link>
                 </Button>
@@ -396,7 +396,7 @@ const DropPin = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
             <div className="bg-card border border-border rounded-xl p-5 hover:border-primary/50 transition-colors">
               <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Navigation className="h-5 w-5 text-primary" />
+                <NavigationArrow className="h-5 w-5 text-primary" />
               </div>
               <h4 className="font-semibold text-foreground mb-2">GPS Detection</h4>
               <p className="text-sm text-muted-foreground mb-4">Let us detect your location automatically</p>
@@ -407,7 +407,7 @@ const DropPin = () => {
             
             <div className="bg-card border border-border rounded-xl p-5 hover:border-primary/50 transition-colors">
               <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Search className="h-5 w-5 text-primary" />
+                <MagnifyingGlass className="h-5 w-5 text-primary" />
               </div>
               <h4 className="font-semibold text-foreground mb-2">Manual Search</h4>
               <p className="text-sm text-muted-foreground mb-4">Select your location from dropdowns</p>
@@ -431,7 +431,7 @@ const DropPin = () => {
                 <h3 className="text-sm font-bold text-foreground">AI-based Nigeria Zip Postal Code Finder</h3>
               </Link>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Free & fast Nigeria zip postal code lookup using GPS or smart search.
+                AI-based Nigeria zip postal code lookup using GPS or smart search.
               </p>
             </div>
 

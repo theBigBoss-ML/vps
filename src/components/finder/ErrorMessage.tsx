@@ -1,4 +1,4 @@
-import { AlertCircle, X } from 'lucide-react';
+import { WarningCircle, X } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 
 interface ErrorMessageProps {
@@ -14,7 +14,7 @@ export function ErrorMessage({ message, onDismiss }: ErrorMessageProps) {
       aria-live="assertive"
     >
       <div className="flex items-start gap-3">
-        <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" aria-hidden="true" />
+        <WarningCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" aria-hidden="true" />
         <div className="flex-1">
           <p className="text-sm text-destructive font-medium">
             {message}

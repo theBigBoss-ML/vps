@@ -7,7 +7,7 @@ export const metadata = {
     default: "AI-based Nigeria Zip Postal Code Finder",
     template: "%s | AI-based Nigeria Zip Postal Code Finder",
   },
-  description: "Find Nigerian postal codes instantly using GPS, smart search, or manual lookup.",
+  description: "AI-based Nigeria postal code finder using GPS, smart search, or manual lookup.",
   manifest: "/manifest.json",
   icons: {
     icon: [

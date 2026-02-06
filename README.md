@@ -2,7 +2,7 @@
 
 ## Project Info
 
-This app helps users find Nigerian postal codes using GPS, smart search, or manual lookup.
+This app helps users find Nigerian postal codes using AI-assisted GPS, smart search, or manual lookup.
 
 ## Local Development
 

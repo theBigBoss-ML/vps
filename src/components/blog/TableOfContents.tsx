@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { TableOfContentsItem } from '@/types/blog';
 import { cn } from '@/lib/utils';
-import { List } from 'lucide-react';
+import { List } from '@phosphor-icons/react';
 
 interface TableOfContentsProps {
   items: TableOfContentsItem[];
