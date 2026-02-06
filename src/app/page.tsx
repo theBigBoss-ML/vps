@@ -246,7 +246,7 @@ const Index = () => {
                 AI-assisted GPS + Smart Search
               </div>
               <h2 className="text-2xl font-bold text-foreground">
-                Find Your Nigeria Zip Postal Code
+                Find Your Nigeria Zip Postal Code in a Split Second
               </h2>
               <p className="text-muted-foreground text-sm">
                 AI-based Nigeria zip postal code finder for instant lookup using GPS or smart search
