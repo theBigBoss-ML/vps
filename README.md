@@ -1,4 +1,4 @@
-# AI-based Nigeria Zip Postal Code Finder
+# Postminer.com.ng
 
 ## Project Info
 

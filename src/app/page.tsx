@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
-import { MapPin, MagnifyingGlass, Crosshair, Warning } from '@phosphor-icons/react';
+import { MapPin, MagnifyingGlass, Crosshair, Warning, BookOpen, Calendar } from '@phosphor-icons/react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LocationButton } from '@/components/finder/LocationButton';
 import { SmartSearch } from '@/components/finder/SmartSearch';
@@ -22,8 +22,10 @@ import { useLocationPermission } from '@/hooks/useLocationPermission';
 import { LocationResult, LookupStatus, RecentLocation } from '@/types/location';
 import { rateLimitedGetPostalCode, getPostalCodeByStateLga } from '@/lib/postalCodeService';
 import { PostalCode } from '@/data/postalCodes';
+import { getAllBlogPosts } from '@/data/blogPosts';
 import { toast } from 'sonner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 
 const PostalCodeDisplay = dynamic(
@@ -48,6 +50,14 @@ const Index = () => {
     markModalSeen, 
     requestPermission 
   } = useLocationPermission();
+  const homepageGuide = getAllBlogPosts()[0];
+  const guidePublishedDate = homepageGuide
+    ? new Date(homepageGuide.publishedAt).toLocaleDateString('en-NG', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : null;
 
   // Auto-switch to manual tab if location is denied
   useEffect(() => {
@@ -200,7 +210,7 @@ const Index = () => {
               <MapPin className="h-6 w-6 text-primary" aria-hidden="true" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-foreground">AI-based Nigeria Zip Postal Code Finder</h1>
+              <h1 className="text-lg font-bold text-foreground">Postminer.com.ng</h1>
               <p className="text-xs text-muted-foreground hidden sm:block">AI-based, free & fast Nigeria zip postal code lookup</p>
             </div>
           </Link>
@@ -218,10 +228,10 @@ const Index = () => {
               State Maps
             </Link>
             <Link 
-              href="/blog" 
+              href="/#nipost-guide" 
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
-              Blog
+              NIPOST Guide
             </Link>
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
           </nav>
@@ -240,16 +250,22 @@ const Index = () => {
           <LoadingState status={status} />
         ) : (
           <div className="space-y-8">
-            <div className="text-center space-y-3">
+            <div className="text-center space-y-4 max-w-xl mx-auto">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full">
                 <Crosshair className="h-3 w-3" />
                 AI-assisted GPS + Smart Search
               </div>
-              <h2 className="text-2xl font-bold text-foreground">
-                Find Your Nigeria Zip Postal Code in a Split Second
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight leading-[1.15] text-foreground max-w-[20ch] mx-auto">
+                Find Your Nigeria Zip Postal Code
+                <span className="block mt-1">
+                  in a{" "}
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full border border-primary/35 bg-primary/15 text-primary shadow-sm shadow-primary/20">
+                    Split Second
+                  </span>
+                </span>
               </h2>
-              <p className="text-muted-foreground text-sm">
-                AI-based Nigeria zip postal code finder for instant lookup using GPS or smart search
+              <p className="text-muted-foreground text-sm sm:text-base leading-relaxed max-w-[52ch] mx-auto">
+                Get accurate Nigeria zip postal codes instantly using GPS detection or manual location search.
               </p>
             </div>
 
@@ -338,6 +354,124 @@ const Index = () => {
         loading={statsLoading}
       />
 
+      {homepageGuide && (
+        <section id="nipost-guide" className="border-t border-border/50 bg-gradient-to-b from-card/10 to-background">
+          <div className="container mx-auto px-4 py-10 md:py-14 max-w-6xl">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+              <div className="lg:col-span-7 space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full">
+                  <BookOpen className="h-3 w-3" />
+                  Postal Code Help Center
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                  Nigeria Zip Postal Code Guide for Delivery, Forms, and Online Orders
+                </h2>
+                <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+                  You can use this page to quickly find a Nigeria zip postal code, then use the right code on delivery
+                  addresses, ecommerce checkouts, bank forms, and government applications. Accurate postcode details reduce
+                  failed deliveries, routing delays, and returned mail.
+                </p>
+                <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+                  NIPOST (Nigerian Postal Service) is the national mail carrier for letters, parcels, and official postal
+                  products. The guide below summarizes core NIPOST mail services and practical delivery options without
+                  pulling users away from the main finder flow.
+                </p>
+                {guidePublishedDate && (
+                  <p className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Calendar className="h-3.5 w-3.5" />
+                    Guide updated: {guidePublishedDate}
+                  </p>
+                )}
+              </div>
+
+              <aside className="lg:col-span-5">
+                <div className="h-full p-5 md:p-6 bg-card/60 border border-border/50 rounded-2xl space-y-4">
+                  <h3 className="text-base md:text-lg font-semibold text-foreground">
+                    Quick Steps After You Find Your Postal Code
+                  </h3>
+                  <ol className="space-y-3 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-3">
+                      <span className="mt-0.5 h-5 w-5 rounded-full bg-primary/15 text-primary text-xs font-semibold flex items-center justify-center">1</span>
+                      Confirm your full address details: street, area, LGA, and state.
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="mt-0.5 h-5 w-5 rounded-full bg-primary/15 text-primary text-xs font-semibold flex items-center justify-center">2</span>
+                      Use the exact postal code in forms and checkout fields to improve delivery accuracy.
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="mt-0.5 h-5 w-5 rounded-full bg-primary/15 text-primary text-xs font-semibold flex items-center justify-center">3</span>
+                      For business mail volume, choose a NIPOST option like PO Box or Private Mail Bag (PMB).
+                    </li>
+                  </ol>
+                </div>
+              </aside>
+            </div>
+
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <article className="p-5 bg-card/50 border border-border/50 rounded-xl">
+                <h3 className="text-sm font-semibold text-foreground mb-2">Mail Classes</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  NIPOST supports first class mail, second class mail, and registered mail. Registered mail is used for
+                  sensitive items and includes special handling with additional postage fees.
+                </p>
+              </article>
+              <article className="p-5 bg-card/50 border border-border/50 rounded-xl">
+                <h3 className="text-sm font-semibold text-foreground mb-2">Delivery Channels</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Delivery options include post office boxes, private mail bags, street delivery, post restante, and caller
+                  services. Your best option depends on security, volume, and access.
+                </p>
+              </article>
+              <article className="p-5 bg-card/50 border border-border/50 rounded-xl">
+                <h3 className="text-sm font-semibold text-foreground mb-2">Counter Services</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Major post office counters provide postal orders, inland money orders, postage stamps, air letter cards,
+                  and post cards used for domestic and international mailing needs.
+                </p>
+              </article>
+            </div>
+
+            <div className="mt-8 p-5 md:p-6 bg-card/60 border border-border/50 rounded-2xl">
+              <h3 className="text-lg font-semibold text-foreground mb-2">Common NIPOST Services Explained</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                {homepageGuide.excerpt}
+              </p>
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="mail-options">
+                  <AccordionTrigger className="text-left text-sm">What mail options does NIPOST provide?</AccordionTrigger>
+                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                    NIPOST handles first class and second class letters, registered mail, and business mail processing.
+                    Registered mail is preferred when you need tracking discipline and careful handling.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="delivery-methods">
+                  <AccordionTrigger className="text-left text-sm">Which delivery method should I choose in Nigeria?</AccordionTrigger>
+                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                    Use a post office box for privacy and predictable collection, PMB for higher mail volume, and street
+                    delivery where formal addressing is stable. Travelers can use post restante for temporary collection.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="postal-products">
+                  <AccordionTrigger className="text-left text-sm">What can I do at a NIPOST counter?</AccordionTrigger>
+                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                    You can buy postage stamps and air letter cards, send inland money orders, and purchase Nigerian postal
+                    orders. Many counters also support agency services tied to public forms and payments.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="why-code-matters">
+                  <AccordionTrigger className="text-left text-sm">Why is the right Nigeria zip postal code important?</AccordionTrigger>
+                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                    The right postal code improves sorting and dispatch, reduces failed delivery attempts, and helps banks,
+                    ecommerce systems, and logistics providers verify destination details correctly.
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
+
+          </div>
+        </section>
+      )}
+
       {/* Location Permission Modal */}
       <LocationPermissionModal
         open={showModal}
@@ -355,7 +489,7 @@ const Index = () => {
                 <div className="p-1.5 bg-primary/20 rounded-lg">
                   <MapPin className="h-4 w-4 text-primary" />
                 </div>
-                <h3 className="text-sm font-bold text-foreground">AI-based Nigeria Zip Postal Code Finder</h3>
+                <h3 className="text-sm font-bold text-foreground">Postminer.com.ng</h3>
               </Link>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 AI-based Nigeria zip postal code lookup using GPS or smart search.
@@ -369,7 +503,7 @@ const Index = () => {
                 <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Home</Link>
                 <Link href="/drop-pin" className="text-sm text-muted-foreground hover:text-primary transition-colors">Drop Pin</Link>
                 <Link href="/state-maps" className="text-sm text-muted-foreground hover:text-primary transition-colors">State Maps</Link>
-                <Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</Link>
+                <Link href="/#nipost-guide" className="text-sm text-muted-foreground hover:text-primary transition-colors">NIPOST Guide</Link>
               </nav>
             </div>
 
@@ -377,7 +511,7 @@ const Index = () => {
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-4">Resources</h4>
               <nav className="flex flex-col gap-3">
-                <Link href="/blog/nipost-services-guide" className="text-sm text-muted-foreground hover:text-primary transition-colors">NIPOST Guide</Link>
+                <Link href="/#nipost-guide" className="text-sm text-muted-foreground hover:text-primary transition-colors">NIPOST Services</Link>
               </nav>
             </div>
 
@@ -393,7 +527,7 @@ const Index = () => {
           {/* Copyright */}
           <div className="border-t border-border/50 mt-8 pt-6">
             <p className="text-sm text-muted-foreground text-center sm:text-left">
-              (c) {new Date().getFullYear()} AI-based Nigeria Zip Postal Code Finder. All rights reserved.
+              (c) {new Date().getFullYear()} Postminer.com.ng. All rights reserved.
             </p>
           </div>
         </div>

@@ -4,8 +4,8 @@ import { Providers } from "./providers";
 
 export const metadata = {
   title: {
-    default: "AI-based Nigeria Zip Postal Code Finder",
-    template: "%s | AI-based Nigeria Zip Postal Code Finder",
+    default: "Postminer.com.ng",
+    template: "%s | Postminer.com.ng",
   },
   description: "AI-based Nigeria postal code finder using GPS, smart search, or manual lookup.",
   manifest: "/manifest.json",

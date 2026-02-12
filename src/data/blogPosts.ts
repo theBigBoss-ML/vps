@@ -113,7 +113,7 @@ const nipostPost: BlogPost = {
   excerpt: 'A comprehensive guide to NIPOST services in Nigeria, including mail types, delivery options, counter services, and how to use Nigeria zip postal codes effectively.',
   content: nipostServicesContent,
   author: {
-    name: 'Nigeria Zip Code Team',
+    name: 'Postminer.com.ng Team',
     role: 'Editorial Team',
   },
   publishedAt: '2025-12-27',

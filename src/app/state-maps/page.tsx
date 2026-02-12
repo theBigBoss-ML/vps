@@ -142,7 +142,7 @@ const StateMaps = () => {
               <MapPin className="h-6 w-6 text-primary" aria-hidden="true" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-foreground">AI-based Nigeria Zip Postal Code Finder</h1>
+              <h1 className="text-lg font-bold text-foreground">Postminer.com.ng</h1>
               <p className="text-xs text-muted-foreground hidden sm:block">AI-based, free & fast Nigeria zip postal code lookup</p>
             </div>
           </Link>
@@ -160,10 +160,10 @@ const StateMaps = () => {
               State Maps
             </Link>
             <Link 
-              href="/blog" 
+              href="/#nipost-guide" 
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
-              Blog
+              NIPOST Guide
             </Link>
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
           </nav>
@@ -478,7 +478,7 @@ const StateMaps = () => {
                 <div className="p-1.5 bg-primary/20 rounded-lg">
                   <MapPin className="h-4 w-4 text-primary" />
                 </div>
-                <h3 className="text-sm font-bold text-foreground">AI-based Nigeria Zip Postal Code Finder</h3>
+                <h3 className="text-sm font-bold text-foreground">Postminer.com.ng</h3>
               </Link>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 AI-based Nigeria zip postal code lookup using GPS or smart search.
@@ -491,7 +491,7 @@ const StateMaps = () => {
               <nav className="flex flex-col gap-3">
                 <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Home</Link>
                 <Link href="/state-maps" className="text-sm text-muted-foreground hover:text-primary transition-colors">State Maps</Link>
-                <Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</Link>
+                <Link href="/#nipost-guide" className="text-sm text-muted-foreground hover:text-primary transition-colors">NIPOST Guide</Link>
               </nav>
             </div>
 
@@ -499,7 +499,7 @@ const StateMaps = () => {
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-4">Resources</h4>
               <nav className="flex flex-col gap-3">
-                <Link href="/blog/nipost-services-guide" className="text-sm text-muted-foreground hover:text-primary transition-colors">NIPOST Guide</Link>
+                <Link href="/#nipost-guide" className="text-sm text-muted-foreground hover:text-primary transition-colors">NIPOST Services</Link>
               </nav>
             </div>
 
@@ -515,7 +515,7 @@ const StateMaps = () => {
           {/* Copyright */}
           <div className="border-t border-border/50 mt-8 pt-6">
             <p className="text-sm text-muted-foreground text-center sm:text-left">
-              (c) {new Date().getFullYear()} AI-based Nigeria Zip Postal Code Finder. All rights reserved.
+              (c) {new Date().getFullYear()} Postminer.com.ng. All rights reserved.
             </p>
           </div>
         </div>

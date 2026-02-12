@@ -1,6 +1,6 @@
 {
-  "name": "Nigerian Postal Code Finder",
-  "short_name": "PostCode NG",
+  "name": "Postminer.com.ng",
+  "short_name": "Postminer",
   "description": "AI-based Nigerian postal code finder using GPS or smart search",
   "start_url": "/",
   "display": "standalone",
