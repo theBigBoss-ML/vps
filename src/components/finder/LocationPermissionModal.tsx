@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { MapPin, NavigationArrow, Shield, Lightning, X, CaretRight, DeviceMobile, Monitor, Warning } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
@@ -112,13 +113,24 @@ export function LocationPermissionModal({
   onRequestPermission,
   onSkip,
 }: LocationPermissionModalProps) {
-  const isDenied = permissionStatus === 'denied';
+  const [showDeniedInstructions, setShowDeniedInstructions] = useState(false);
+  const isBrowserDenied = permissionStatus === 'denied';
+  const isUnavailable = permissionStatus === 'unavailable';
+  const isDenied = showDeniedInstructions || isUnavailable;
+
+  useEffect(() => {
+    if (open) {
+      setShowDeniedInstructions(false);
+    }
+  }, [open]);
 
   const handleEnableLocation = async () => {
     const success = await onRequestPermission();
     if (success) {
       onOpenChange(false);
+      return;
     }
+    setShowDeniedInstructions(true);
   };
 
   const handleSkip = () => {
@@ -190,6 +202,11 @@ export function LocationPermissionModal({
                 >
                   Skip for now - I'll use manual search
                 </Button>
+                {isBrowserDenied && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    If location was previously blocked, tap <strong>Enable Location Access</strong> to continue.
+                  </p>
+                )}
               </div>
             </>
           )}
