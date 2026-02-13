@@ -116,7 +116,7 @@ export function LocationPermissionModal({
   const [showDeniedInstructions, setShowDeniedInstructions] = useState(false);
   const isBrowserDenied = permissionStatus === 'denied';
   const isUnavailable = permissionStatus === 'unavailable';
-  const isDenied = showDeniedInstructions || isUnavailable;
+  const isDenied = showDeniedInstructions || isBrowserDenied || isUnavailable;
 
   useEffect(() => {
     if (open) {
