@@ -42,4 +42,6 @@ Set these in `.env`:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `NEXT_PUBLIC_SUPABASE_PROJECT_ID` (optional)
-- `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` (optional)
+- `GOOGLE_MAPS_API_KEY` (required for `/api/geocode` lookups)
+- `NEXT_PUBLIC_SITE_URL` (optional, defaults to `https://postminer.com.ng`)
+- `NEXT_PUBLIC_GTM_ID` (optional, enables GTM when provided)

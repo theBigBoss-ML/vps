@@ -13,23 +13,9 @@ export function UsageStatsDisplay({ generations, likes, copies, loading }: Usage
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
     return num.toString();
   };
-
-  if (loading) {
-    return (
-      <div className="py-8 px-4 bg-card/50 border-t border-border/50">
-        <div className="container mx-auto max-w-4xl">
-          <div className="flex justify-center gap-8 animate-pulse">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex flex-col items-center gap-2">
-                <div className="h-8 w-16 bg-muted rounded" />
-                <div className="h-4 w-20 bg-muted rounded" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const generationValue = loading ? "--" : formatNumber(generations);
+  const likesValue = loading ? "--" : formatNumber(likes);
+  const copiesValue = loading ? "--" : formatNumber(copies);
 
   return (
     <div className="py-8 px-4 bg-card/50 border-t border-border/50">
@@ -41,21 +27,21 @@ export function UsageStatsDisplay({ generations, likes, copies, loading }: Usage
           <div className="flex flex-col items-center gap-2">
             <div className="flex items-center gap-2">
               <Lightning className="h-5 w-5 text-nigeria-green" />
-              <span className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">{formatNumber(generations)}</span>
+              <span className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums min-w-[2.6ch] text-right">{generationValue}</span>
             </div>
             <span className="text-xs sm:text-sm text-muted-foreground text-center">Codes Generated</span>
           </div>
           <div className="flex flex-col items-center gap-2">
             <div className="flex items-center gap-2">
               <ThumbsUp className="h-5 w-5 text-nigeria-green" />
-              <span className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">{formatNumber(likes)}</span>
+              <span className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums min-w-[2.6ch] text-right">{likesValue}</span>
             </div>
             <span className="text-xs sm:text-sm text-muted-foreground text-center">Helpful Votes</span>
           </div>
           <div className="flex flex-col items-center gap-2">
             <div className="flex items-center gap-2">
               <Copy className="h-5 w-5 text-nigeria-green" />
-              <span className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">{formatNumber(copies)}</span>
+              <span className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums min-w-[2.6ch] text-right">{copiesValue}</span>
             </div>
             <span className="text-xs sm:text-sm text-muted-foreground text-center">Codes Copied</span>
           </div>

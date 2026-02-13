@@ -1,9 +1,9 @@
 "use client";
 
 import dynamic from 'next/dynamic';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
-import { MapPin, MagnifyingGlass, Crosshair, Warning, BookOpen, Calendar } from '@phosphor-icons/react';
+import { MapPin, MagnifyingGlass, Crosshair, BookOpen, Calendar } from '@phosphor-icons/react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LocationButton } from '@/components/finder/LocationButton';
 import { SmartSearch } from '@/components/finder/SmartSearch';
@@ -24,9 +24,7 @@ import { rateLimitedGetPostalCode, getPostalCodeByStateLga } from '@/lib/postalC
 import { PostalCode } from '@/data/postalCodes';
 import { getAllBlogPosts } from '@/data/blogPosts';
 import { toast } from 'sonner';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Button } from '@/components/ui/button';
 
 const PostalCodeDisplay = dynamic(
   () => import('@/components/finder/PostalCodeDisplay').then((mod) => mod.PostalCodeDisplay),
@@ -37,7 +35,7 @@ const Index = () => {
   const [status, setStatus] = useState<LookupStatus>('idle');
   const [result, setResult] = useState<LocationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<string>('gps');
+  const [activeTab, setActiveTab] = useState<string>('manual');
   
   const { getCurrentPosition, error: geoError, clearError, accuracy, accuracyLevel } = useGeolocation();
   const { recentLocations, addRecentLocation, clearRecentLocations } = useRecentLocations();
@@ -58,13 +56,6 @@ const Index = () => {
         day: 'numeric',
       })
     : null;
-
-  // Auto-switch to manual tab if location is denied
-  useEffect(() => {
-    if (permissionStatus === 'denied') {
-      setActiveTab('manual');
-    }
-  }, [permissionStatus]);
 
   const handleDetectLocation = useCallback(async () => {
     setError(null);
@@ -196,6 +187,44 @@ const Index = () => {
   }, [result, trackStat]);
 
   const isLoading = status === 'detecting' || status === 'geocoding';
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: 'What mail options does NIPOST provide?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'NIPOST supports first class, second class, and registered mail options for different delivery priorities and handling requirements.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Which delivery method should I choose in Nigeria?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Choose post office box for private collection, PMB for high mail volume, and street delivery when formal addressing is stable.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'What can I do at a NIPOST counter?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'You can buy stamps, send inland money orders, purchase postal orders, and access additional agency-related postal services.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Why is the right Nigeria zip postal code important?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Correct postal codes improve routing accuracy, reduce failed deliveries, and help forms, banks, and ecommerce systems verify destinations.',
+        },
+      },
+    ],
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -276,32 +305,18 @@ const Index = () => {
               />
             )}
 
-            {/* Location denied banner */}
-            {permissionStatus === 'denied' && (
-              <Alert className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
-                <Warning className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                <AlertDescription className="text-sm text-amber-800 dark:text-amber-200">
-                  Location access is disabled. 
-                  <Button 
-                    variant="link" 
-                    className="h-auto p-0 ml-1 text-amber-700 dark:text-amber-300 underline"
-                    onClick={() => setShowModal(true)}
-                  >
-                    Learn how to enable it
-                  </Button>
-                  {' '}or use manual search below.
-                </AlertDescription>
-              </Alert>
-            )}
-
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
               <TabsList className="grid w-full grid-cols-2 h-12">
                 <TabsTrigger value="gps" className="gap-2 h-10" disabled={permissionStatus === 'denied'}>
                   <MapPin className="h-4 w-4" aria-hidden="true" />
                   Use GPS
-                  {permissionStatus === 'denied' && (
-                    <span className="text-[10px] text-muted-foreground">(disabled)</span>
-                  )}
+                  <span
+                    className={`text-[10px] text-muted-foreground ${
+                      permissionStatus === 'denied' ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  >
+                    (disabled)
+                  </span>
                 </TabsTrigger>
                 <TabsTrigger value="manual" className="gap-2 h-10">
                   <MagnifyingGlass className="h-4 w-4" aria-hidden="true" />
@@ -479,6 +494,10 @@ const Index = () => {
         permissionStatus={permissionStatus}
         onRequestPermission={requestPermission}
         onSkip={markModalSeen}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
       <footer className="border-t border-border/50 py-8 md:py-12 bg-card/30">

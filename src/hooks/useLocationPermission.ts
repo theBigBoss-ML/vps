@@ -96,14 +96,8 @@ export function useLocationPermission(): UseLocationPermissionReturn {
     checkPermission();
   }, [checkPermission]);
 
-  // Show modal if first visit and permission not yet granted
-  useEffect(() => {
-    if (!hasSeenModal && permissionStatus !== 'granted' && permissionStatus !== 'unknown') {
-      // Small delay to let page render first
-      const timer = setTimeout(() => setShowModal(true), 500);
-      return () => clearTimeout(timer);
-    }
-  }, [hasSeenModal, permissionStatus]);
+  // Do not auto-open modal on load to avoid layout instability.
+  // The modal is still available through explicit user actions.
 
   return {
     permissionStatus,

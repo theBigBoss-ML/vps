@@ -100,7 +100,7 @@ const StateMaps = () => {
   };
 
   const openInNewTab = () => {
-    window.open(stateMapUrl, '_blank');
+    window.open(stateMapUrl, '_blank', 'noopener,noreferrer');
   };
 
   const downloadMap = async () => {
@@ -119,7 +119,7 @@ const StateMaps = () => {
       toast.success('Map downloaded!');
     } catch {
       // Fallback: open in new tab
-      window.open(stateMapUrl, '_blank');
+      window.open(stateMapUrl, '_blank', 'noopener,noreferrer');
       toast.info('Map opened in new tab for download');
     }
   };
@@ -130,6 +130,24 @@ const StateMaps = () => {
     setStateMapUrl('');
     setSelectedStateName('');
     setImageError(false);
+  };
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://postminer.com.ng/',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'State Maps',
+        item: 'https://postminer.com.ng/state-maps',
+      },
+    ],
   };
 
   return (
@@ -403,6 +421,10 @@ const StateMaps = () => {
                           src={stateMapUrl} 
                           alt={`${selectedStateName} State Postal Code Map`}
                           className="w-full h-auto"
+                          width={1200}
+                          height={900}
+                          loading="eager"
+                          decoding="async"
                           style={{ maxWidth: 'none' }}
                           onLoad={handleImageLoad}
                           onError={handleImageError}
@@ -467,6 +489,10 @@ const StateMaps = () => {
           </div>
         )}
       </main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
 
       {/* Footer */}
       <footer className="border-t border-border/50 py-8 md:py-12 bg-card/30">

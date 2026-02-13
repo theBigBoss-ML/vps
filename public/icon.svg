@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #0f1b14; }
+      .line { stroke: #6de0a7; }
+    }
+    @media (prefers-color-scheme: light) {
+      .bg { fill: #e7f7ef; }
+      .line { stroke: #008751; }
+    }
+  </style>
+  <rect class="bg" x="32" y="32" width="448" height="448" rx="128" />
+  <g class="line" transform="translate(96 96)" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M288 144c0 79.893-88.624 163.087-118.384 188.784a16 16 0 0 1-19.232 0C120.624 307.087 32 223.893 32 144a128 128 0 0 1 256 0" />
+    <circle cx="160" cy="144" r="48" />
+  </g>
+</svg>

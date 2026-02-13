@@ -1,0 +1,20 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Nigerian Postal Service (NIPOST) Guide",
+  "image": "https://postminer.com.ng/icon-512.png",
+  "author": {
+    "@type": "Organization",
+    "name": "Postminer.com.ng"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Postminer.com.ng",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://postminer.com.ng/icon-512.png"
+    }
+  },
+  "datePublished": "2025-12-27",
+  "dateModified": "2026-02-13"
+}

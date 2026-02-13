@@ -1,0 +1,17 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "Nigeria Postal Code Lookup",
+  "image": "https://postminer.com.ng/icon-512.png",
+  "description": "Digital lookup tool for accurate Nigeria postal codes",
+  "brand": {
+    "@type": "Brand",
+    "name": "Postminer.com.ng"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "0.00",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock"
+  }
+}

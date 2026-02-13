@@ -1,17 +1,101 @@
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
+import type { Metadata } from "next";
+import Script from "next/script";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import { Providers } from "./providers";
 
-export const metadata = {
-  title: {
-    default: "Postminer.com.ng",
-    template: "%s | Postminer.com.ng",
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://postminer.com.ng";
+const siteTitle = "Postminer.com.ng";
+const siteDescription =
+  "Find accurate Nigeria postal codes with GPS detection, drop-pin lookup, and state map tools for deliveries, forms, ecommerce checkouts, and address checks.";
+const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "optional",
+  variable: "--font-sans",
+});
+
+const jetBrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  display: "optional",
+  variable: "--font-mono",
+});
+
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: siteTitle,
+  url: siteUrl,
+  logo: `${siteUrl}/icon-512.png`,
+};
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: siteTitle,
+  url: siteUrl,
+  potentialAction: {
+    "@type": "SearchAction",
+    target: `${siteUrl}/?q={search_term_string}`,
+    "query-input": "required name=search_term_string",
   },
-  description: "AI-based Nigeria postal code finder using GPS, smart search, or manual lookup.",
-  manifest: "/manifest.json",
+};
+
+export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  applicationName: siteTitle,
+  title: {
+    default: siteTitle,
+    template: `%s | ${siteTitle}`,
+  },
+  description: siteDescription,
+  alternates: {
+    canonical: "/",
+    languages: {
+      "en-ng": "/",
+      "x-default": "/",
+    },
+  },
+  openGraph: {
+    type: "website",
+    url: siteUrl,
+    title: siteTitle,
+    description: siteDescription,
+    siteName: siteTitle,
+    locale: "en_NG",
+    images: [
+      {
+        url: "/icon-512.png",
+        width: 512,
+        height: 512,
+        alt: "Postminer.com.ng logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteTitle,
+    description: siteDescription,
+    images: ["/icon-512.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  manifest: "/manifest.webmanifest",
   icons: {
     icon: [
-      { url: "/favicon.ico" },
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/icon.svg", type: "image/svg+xml" },
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
@@ -26,7 +110,50 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
+      {gtmId ? (
+        <>
+          <Script id="gtm-consent" strategy="beforeInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('consent', 'default', {
+                'ad_storage': 'denied',
+                'analytics_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied'
+              });
+            `}
+          </Script>
+          <Script id="gtm-init" strategy="afterInteractive">
+            {`
+              (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+              new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+              })(window,document,'script','dataLayer','${gtmId}');
+            `}
+          </Script>
+        </>
+      ) : null}
+      <body className={`${inter.variable} ${jetBrainsMono.variable}`}>
+        {gtmId ? (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
+        ) : null}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
         <Providers>{children}</Providers>
       </body>
     </html>

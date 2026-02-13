@@ -1,0 +1,22 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Why is the right Nigeria zip postal code important?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Correct postal codes improve sorting, reduce failed deliveries, and improve address validation in forms."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I find a postal code with GPS?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. You can use GPS detection or drop-pin lookup to retrieve postal code details for your location."
+      }
+    }
+  ]
+}

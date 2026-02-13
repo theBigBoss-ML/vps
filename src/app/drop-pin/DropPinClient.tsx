@@ -3,11 +3,19 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { MapPin, Copy, ShareNetwork, Star, NavigationArrow, MagnifyingGlass, SpinnerGap, MapPinLine, Trash } from '@phosphor-icons/react';
-import L from 'leaflet';
+import type {
+  LeafletMouseEvent,
+  LatLngBoundsExpression,
+  LatLngExpression,
+  Map as LeafletMap,
+  Marker as LeafletMarker,
+} from 'leaflet';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/finder/ThemeToggle';
 import { useTheme } from '@/hooks/useTheme';
 import { toast } from 'sonner';
+
+type LeafletModule = typeof import('leaflet');
 
 interface PinData {
   lat: number;
@@ -17,28 +25,28 @@ interface PinData {
   state: string | null;
   lga: string | null;
   source: 'nominatim' | 'database' | null;
-  marker?: L.Marker;
+  marker?: LeafletMarker;
 }
 
 // Nigeria bounds and center
-const NIGERIA_BOUNDS: L.LatLngBoundsExpression = [
+const NIGERIA_BOUNDS: LatLngBoundsExpression = [
   [4.2, 2.7],
   [13.9, 14.7]
 ];
-const NIGERIA_CENTER: L.LatLngExpression = [9.0820, 8.6753];
+const NIGERIA_CENTER: LatLngExpression = [9.0820, 8.6753];
 
 const DropPin = () => {
-  const mapRef = useRef<L.Map | null>(null);
+  const mapRef = useRef<LeafletMap | null>(null);
+  const leafletRef = useRef<LeafletModule | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [pins, setPins] = useState<PinData[]>([]);
   const [currentPin, setCurrentPin] = useState<PinData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [mapReady, setMapReady] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
   // Create custom marker icon
-  const createCustomIcon = () => {
-    return L.divIcon({
+  const createCustomIcon = useCallback((leaflet: LeafletModule) => {
+    return leaflet.divIcon({
       className: 'custom-pin-marker',
       html: `
         <div class="pin-marker">
@@ -50,10 +58,17 @@ const DropPin = () => {
       iconAnchor: [15, 42],
       popupAnchor: [0, -42]
     });
-  };
+  }, []);
 
-  const handlePinDrop = useCallback(async (lat: number, lng: number, map: L.Map) => {
+  const handlePinDrop = useCallback(async (lat: number, lng: number, map: LeafletMap) => {
     setLoading(true);
+    const leaflet = leafletRef.current;
+
+    if (!leaflet) {
+      setLoading(false);
+      toast.error('Map is still loading. Please try again.');
+      return;
+    }
     
     const newPin: PinData = {
       lat,
@@ -89,7 +104,7 @@ const DropPin = () => {
       }
 
       // Add marker to map
-      const marker = L.marker([lat, lng], { icon: createCustomIcon() }).addTo(map);
+      const marker = leaflet.marker([lat, lng], { icon: createCustomIcon(leaflet) }).addTo(map);
       
       const popupContent = `
         <div class="pin-popup">
@@ -124,35 +139,48 @@ const DropPin = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [createCustomIcon]);
 
   // Initialize map
   useEffect(() => {
-    if (!mapContainerRef.current || mapRef.current) return;
+    let isActive = true;
 
-    const map = L.map(mapContainerRef.current, {
-      center: NIGERIA_CENTER,
-      zoom: 6,
-      maxBounds: NIGERIA_BOUNDS,
-      minZoom: 5,
-    });
+    const initializeMap = async () => {
+      if (!mapContainerRef.current || mapRef.current) return;
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+      const leaflet = await import('leaflet');
+      if (!isActive || !mapContainerRef.current || mapRef.current) return;
 
-    map.on('click', (e: L.LeafletMouseEvent) => {
-      handlePinDrop(e.latlng.lat, e.latlng.lng, map);
-    });
+      leafletRef.current = leaflet;
+      const map = leaflet.map(mapContainerRef.current, {
+        center: NIGERIA_CENTER,
+        zoom: 6,
+        maxBounds: NIGERIA_BOUNDS,
+        minZoom: 5,
+      });
 
-    mapRef.current = map;
-    setMapReady(true);
+      leaflet
+        .tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        })
+        .addTo(map);
+
+      map.on('click', (e: LeafletMouseEvent) => {
+        void handlePinDrop(e.latlng.lat, e.latlng.lng, map);
+      });
+
+      mapRef.current = map;
+    };
+
+    void initializeMap();
 
     return () => {
+      isActive = false;
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
       }
+      leafletRef.current = null;
     };
   }, [handlePinDrop]);
 
@@ -208,6 +236,24 @@ const DropPin = () => {
     localStorage.setItem('favoritePins', JSON.stringify(favorites));
     toast.success('Saved to favorites!');
   }, []);
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://postminer.com.ng/',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Drop Pin',
+        item: 'https://postminer.com.ng/drop-pin',
+      },
+    ],
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -418,6 +464,10 @@ const DropPin = () => {
           </div>
         </div>
       </main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
 
       {/* Footer */}
       <footer className="border-t border-border/50 py-8 md:py-12 bg-card/30">

@@ -1,31 +1,30 @@
 import type { Metadata } from "next";
-import DropPinClient from "./DropPinClient";
 
-const pageTitle = "Drop Pin Postal Code Finder in Nigeria";
+const pageTitle = "Nigeria State Postal Code Maps";
 const pageDescription =
-  "Drop a pin on the map to find accurate Nigeria postal codes for addresses, deliveries, and online form submissions quickly.";
+  "Explore official-style Nigeria state postal code maps with zoom controls to locate area and LGA postal details online quickly.";
 
 export const metadata: Metadata = {
   title: pageTitle,
   description: pageDescription,
   alternates: {
-    canonical: "/drop-pin",
+    canonical: "/state-maps",
     languages: {
-      "en-ng": "/drop-pin",
-      "x-default": "/drop-pin",
+      "en-ng": "/state-maps",
+      "x-default": "/state-maps",
     },
   },
   openGraph: {
     title: pageTitle,
     description: pageDescription,
-    url: "/drop-pin",
+    url: "/state-maps",
     type: "website",
     images: [
       {
         url: "/icon-512.png",
         width: 512,
         height: 512,
-        alt: "Drop pin postal code finder",
+        alt: "Nigeria state postal code maps",
       },
     ],
   },
@@ -37,6 +36,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default function DropPinPage() {
-  return <DropPinClient />;
+export default function StateMapsLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return children;
 }
