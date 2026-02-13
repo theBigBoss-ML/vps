@@ -8,35 +8,49 @@ interface UsageStats {
   copies: number;
 }
 
+type UsageStatType = 'generation' | 'like' | 'dislike' | 'copy';
+
+const EMPTY_USAGE_STATS: UsageStats = {
+  generations: 0,
+  likes: 0,
+  dislikes: 0,
+  copies: 0,
+};
+
+const statTypeToStatsKey: Record<UsageStatType, keyof UsageStats> = {
+  generation: 'generations',
+  like: 'likes',
+  dislike: 'dislikes',
+  copy: 'copies',
+};
+
+async function getCountForStatType(statType: UsageStatType): Promise<number> {
+  const { count, error } = await supabase
+    .from('usage_stats')
+    .select('id', { count: 'exact', head: true })
+    .eq('stat_type', statType);
+
+  if (error) throw error;
+  return count ?? 0;
+}
+
 export function useUsageStats() {
-  const [stats, setStats] = useState<UsageStats>({
-    generations: 0,
-    likes: 0,
-    dislikes: 0,
-    copies: 0,
-  });
+  const [stats, setStats] = useState<UsageStats>(EMPTY_USAGE_STATS);
   const [loading, setLoading] = useState(true);
 
   const fetchStats = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('usage_stats')
-        .select('stat_type');
+      const statTypes: UsageStatType[] = ['generation', 'like', 'dislike', 'copy'];
+      const countEntries = await Promise.all(
+        statTypes.map(async (statType) => {
+          const count = await getCountForStatType(statType);
+          return [statType, count] as const;
+        })
+      );
 
-      if (error) throw error;
-
-      const counts: UsageStats = {
-        generations: 0,
-        likes: 0,
-        dislikes: 0,
-        copies: 0,
-      };
-
-      data?.forEach((row) => {
-        if (row.stat_type === 'generation') counts.generations++;
-        else if (row.stat_type === 'like') counts.likes++;
-        else if (row.stat_type === 'dislike') counts.dislikes++;
-        else if (row.stat_type === 'copy') counts.copies++;
+      const counts: UsageStats = { ...EMPTY_USAGE_STATS };
+      countEntries.forEach(([statType, count]) => {
+        counts[statTypeToStatsKey[statType]] = count;
       });
 
       setStats(counts);
@@ -51,7 +65,7 @@ export function useUsageStats() {
     fetchStats();
   }, [fetchStats]);
 
-  const trackStat = useCallback(async (statType: 'generation' | 'like' | 'dislike' | 'copy', postalCode?: string) => {
+  const trackStat = useCallback(async (statType: UsageStatType, postalCode?: string) => {
     try {
       const { error } = await supabase
         .from('usage_stats')
@@ -62,12 +76,7 @@ export function useUsageStats() {
       // Optimistically update local state
       setStats(prev => ({
         ...prev,
-        [statType === 'generation' ? 'generations' : 
-         statType === 'like' ? 'likes' : 
-         statType === 'dislike' ? 'dislikes' : 'copies']: 
-        prev[statType === 'generation' ? 'generations' : 
-             statType === 'like' ? 'likes' : 
-             statType === 'dislike' ? 'dislikes' : 'copies'] + 1,
+        [statTypeToStatsKey[statType]]: prev[statTypeToStatsKey[statType]] + 1,
       }));
     } catch (error) {
       console.error('Error tracking stat:', error);
