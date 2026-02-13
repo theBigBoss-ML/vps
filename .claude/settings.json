@@ -1,0 +1,30 @@
+{
+  "description": "Claude Code configuration for Striker CMS project",
+  "permissions": {
+    "allow": ["Skill", "Bash", "Read", "Write", "Edit", "Glob", "Grep", "Task"]
+  },
+  "hooks": {
+    "SessionStart": {
+      "enabled": true,
+      "description": "Automatically initialize project environment when session starts"
+    },
+    "UserPromptSubmit": {
+      "enabled": true,
+      "description": "Auto-detect trigger words and invoke relevant skills"
+    }
+  },
+  "skills": {
+    "session-start-hook": {
+      "enabled": true,
+      "autoInvoke": true,
+      "triggers": [
+        "setup",
+        "initialize",
+        "configure",
+        "environment",
+        "start project",
+        "repository setup"
+      ]
+    }
+  }
+}

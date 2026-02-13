@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# SessionStart Hook - Automatically runs when a new Claude Code session starts
+# This hook ensures that necessary skills are invoked for project setup
+
+echo "🚀 Session starting - initializing project environment..."
+
+# Auto-invoke the session-start-hook skill to set up the project
+echo "SKILL:session-start-hook"
+
+exit 0

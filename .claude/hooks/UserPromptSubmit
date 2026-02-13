@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# UserPromptSubmit Hook - Intelligent Multi-Skill Auto-Triggering System
+# This hook automatically detects keywords and triggers relevant skills
+
+# Get the user's prompt from stdin
+USER_PROMPT=$(cat)
+
+# Path to skills registry
+REGISTRY_FILE=".claude/skills-registry.conf"
+
+# Function to parse skills registry and check for triggers
+auto_invoke_skills() {
+    if [ ! -f "$REGISTRY_FILE" ]; then
+        echo "$USER_PROMPT"
+        return
+    fi
+
+    local current_skill=""
+    local triggered_skills=()
+
+    # Read the registry file
+    while IFS= read -r line; do
+        # Skip comments and empty lines
+        [[ "$line" =~ ^#.*$ ]] && continue
+        [[ -z "$line" ]] && continue
+
+        # Detect skill name [skill-name]
+        if [[ "$line" =~ ^\[(.+)\]$ ]]; then
+            current_skill="${BASH_REMATCH[1]}"
+            continue
+        fi
+
+        # Check triggers for current skill
+        if [[ "$line" =~ ^triggers=(.+)$ ]] && [ -n "$current_skill" ]; then
+            local triggers="${BASH_REMATCH[1]}"
+
+            # Split triggers by comma and check each one
+            IFS=',' read -ra TRIGGER_ARRAY <<< "$triggers"
+            for trigger in "${TRIGGER_ARRAY[@]}"; do
+                # Trim whitespace
+                trigger=$(echo "$trigger" | xargs)
+
+                # Check if prompt contains this trigger (case insensitive)
+                if echo "$USER_PROMPT" | grep -qiE "\\b${trigger}\\b"; then
+                    # Avoid duplicate skill triggers
+                    if [[ ! " ${triggered_skills[@]} " =~ " ${current_skill} " ]]; then
+                        triggered_skills+=("$current_skill")
+                    fi
+                    break
+                fi
+            done
+        fi
+    done < "$REGISTRY_FILE"
+
+    # Output skill triggers
+    for skill in "${triggered_skills[@]}"; do
+        echo "SKILL:$skill"
+    done
+}
+
+# Auto-invoke skills based on triggers
+auto_invoke_skills
+
+# Always pass through the original prompt
+echo "$USER_PROMPT"
+
+exit 0
