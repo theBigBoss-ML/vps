@@ -96,8 +96,17 @@ export function useLocationPermission(): UseLocationPermissionReturn {
     checkPermission();
   }, [checkPermission]);
 
-  // Do not auto-open modal on load to avoid layout instability.
-  // The modal is still available through explicit user actions.
+  // Auto-prompt only for first-time visitors when location is not granted.
+  // Once dismissed, do not auto-open on subsequent visits.
+  useEffect(() => {
+    const shouldPrompt =
+      permissionStatus === 'prompt' ||
+      permissionStatus === 'denied';
+
+    if (shouldPrompt && !hasSeenModal) {
+      setShowModal(true);
+    }
+  }, [permissionStatus, hasSeenModal]);
 
   return {
     permissionStatus,

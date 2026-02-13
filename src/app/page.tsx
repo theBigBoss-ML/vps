@@ -35,7 +35,7 @@ const Index = () => {
   const [status, setStatus] = useState<LookupStatus>('idle');
   const [result, setResult] = useState<LocationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<string>('manual');
+  const [activeTab, setActiveTab] = useState<string>('gps');
   
   const { getCurrentPosition, error: geoError, clearError, accuracy, accuracyLevel } = useGeolocation();
   const { recentLocations, addRecentLocation, clearRecentLocations } = useRecentLocations();
@@ -43,9 +43,11 @@ const Index = () => {
   const { stats, loading: statsLoading, trackStat } = useUsageStats();
   const { 
     permissionStatus, 
+    hasSeenModal,
     showModal, 
     setShowModal, 
     markModalSeen, 
+    checkPermission,
     requestPermission 
   } = useLocationPermission();
   const homepageGuide = getAllBlogPosts()[0];
@@ -60,12 +62,32 @@ const Index = () => {
   const handleDetectLocation = useCallback(async () => {
     setError(null);
     setResult(null);
+
+    const latestPermission = await checkPermission();
+    const shouldRepromptOnGpsAttempt =
+      hasSeenModal && (latestPermission === 'prompt' || latestPermission === 'denied');
+
+    if (shouldRepromptOnGpsAttempt) {
+      setShowModal(true);
+      setStatus('idle');
+      return;
+    }
+
     setStatus('detecting');
 
     const coords = await getCurrentPosition();
     if (!coords) {
+      const deniedPermissionMessage =
+        'Location access denied. Please enable location permissions in your browser settings, then try again.';
+      const genericPermissionMessage =
+        'Could not detect location. Please enable location services and try again.';
+      const shouldShowDeniedGuidance = latestPermission === 'denied';
+
       setStatus('error');
-      setError(geoError || 'Could not detect location');
+      setError(geoError || (shouldShowDeniedGuidance ? deniedPermissionMessage : genericPermissionMessage));
+      if (shouldShowDeniedGuidance) {
+        setShowModal(true);
+      }
       return;
     }
 
@@ -97,7 +119,7 @@ const Index = () => {
 
     setStatus('error');
     setError('Could not find postal code for your location. Try manual search.');
-  }, [getCurrentPosition, geoError, addRecentLocation, trackStat]);
+  }, [getCurrentPosition, checkPermission, hasSeenModal, geoError, addRecentLocation, trackStat, setShowModal]);
 
   const handleSmartSearch = useCallback((result: PostalCode) => {
     const locationResult: LocationResult = {
@@ -307,16 +329,9 @@ const Index = () => {
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
               <TabsList className="grid w-full grid-cols-2 h-12">
-                <TabsTrigger value="gps" className="gap-2 h-10" disabled={permissionStatus === 'denied'}>
+                <TabsTrigger value="gps" className="gap-2 h-10">
                   <MapPin className="h-4 w-4" aria-hidden="true" />
                   Use GPS
-                  <span
-                    className={`text-[10px] text-muted-foreground ${
-                      permissionStatus === 'denied' ? 'opacity-100' : 'opacity-0'
-                    }`}
-                  >
-                    (disabled)
-                  </span>
                 </TabsTrigger>
                 <TabsTrigger value="manual" className="gap-2 h-10">
                   <MagnifyingGlass className="h-4 w-4" aria-hidden="true" />
