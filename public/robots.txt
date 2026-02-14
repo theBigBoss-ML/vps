@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /_next/static/
+Disallow: /api/
 
 # Core sitemaps
 Sitemap: https://postminer.com.ng/sitemap.xml
