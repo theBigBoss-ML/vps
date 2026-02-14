@@ -6,9 +6,9 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import { Providers } from "./providers";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://postminer.com.ng";
-const siteTitle = "Postminer.com.ng";
+const siteTitle = "Postminer.com.ng: Instant Nigeria Zip Code via GPS and Map Search";
 const siteDescription =
-  "Find accurate Nigeria postal codes with GPS detection, drop-pin lookup, and state map tools for deliveries, forms, ecommerce checkouts, and address checks.";
+  "Need your Nigeria zip postal code right now? Tap GPS and get it instantly. Works for Lagos, Abuja, and every state. No lists, no guesswork.";
 const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 
 const inter = Inter({

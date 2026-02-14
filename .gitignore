@@ -25,3 +25,14 @@ out
 *.sln
 *.sw?
 *.tsbuildinfo
+
+# Research & planning files (not for production)
+SEO_IMPLEMENTATION_PLAN.md
+nigerian_postal_history.md
+google-keywords-*.csv
+writing voice/
+
+# Environment
+.env
+.env.*
+!.env.example
