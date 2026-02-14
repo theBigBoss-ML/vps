@@ -206,12 +206,13 @@ const Index = () => {
   const { stats, loading: statsLoading, trackStat } = useUsageStats();
   const {
     permissionStatus,
-    hasSeenModal,
     showModal,
-    setShowModal,
+    modalOpenReason,
     markModalSeen,
     checkPermission,
-    requestPermission
+    requestPermission,
+    showModalForGpsAttempt,
+    handleModalOpenChange,
   } = useLocationPermission();
   const homepageGuide = getAllBlogPosts()[0];
   const guidePublishedDate = homepageGuide
@@ -222,24 +223,14 @@ const Index = () => {
       })
     : null;
 
-  const handleDetectLocation = useCallback(async () => {
+  const performGpsLookup = useCallback(async () => {
     setError(null);
     setResult(null);
-
-    const latestPermission = await checkPermission();
-    const shouldRepromptOnGpsAttempt =
-      hasSeenModal && (latestPermission === 'prompt' || latestPermission === 'denied');
-
-    if (shouldRepromptOnGpsAttempt) {
-      setShowModal(true);
-      setStatus('idle');
-      return;
-    }
-
     setStatus('detecting');
 
     const coords = await getCurrentPosition();
     if (!coords) {
+      const latestPermission = await checkPermission();
       const deniedPermissionMessage =
         'Location access denied. Please enable location permissions in your browser settings, then try again.';
       const genericPermissionMessage =
@@ -249,7 +240,7 @@ const Index = () => {
       setStatus('error');
       setError(geoError || (shouldShowDeniedGuidance ? deniedPermissionMessage : genericPermissionMessage));
       if (shouldShowDeniedGuidance) {
-        setShowModal(true);
+        showModalForGpsAttempt();
       }
       return;
     }
@@ -282,7 +273,27 @@ const Index = () => {
 
     setStatus('error');
     setError('Could not find postal code for your location. Try manual search.');
-  }, [getCurrentPosition, checkPermission, hasSeenModal, geoError, addRecentLocation, trackStat, setShowModal]);
+  }, [getCurrentPosition, checkPermission, geoError, addRecentLocation, trackStat, showModalForGpsAttempt]);
+
+  const handleDetectLocation = useCallback(async () => {
+    setError(null);
+    setResult(null);
+
+    const latestPermission = await checkPermission();
+
+    if (latestPermission === 'granted') {
+      return performGpsLookup();
+    }
+
+    if (latestPermission === 'prompt' || latestPermission === 'denied') {
+      showModalForGpsAttempt();
+      return;
+    }
+
+    // unavailable or unknown
+    setStatus('error');
+    setError('Geolocation is not supported by your browser. Please use manual search.');
+  }, [checkPermission, performGpsLookup, showModalForGpsAttempt]);
 
   const handleSmartSearch = useCallback((result: PostalCode) => {
     const locationResult: LocationResult = {
@@ -739,10 +750,12 @@ const Index = () => {
       {/* ── Location Permission Modal ──────────────────────── */}
       <LocationPermissionModal
         open={showModal}
-        onOpenChange={setShowModal}
+        onOpenChange={handleModalOpenChange}
         permissionStatus={permissionStatus}
+        modalOpenReason={modalOpenReason}
         onRequestPermission={requestPermission}
-        onSkip={markModalSeen}
+        onMarkSeen={markModalSeen}
+        onPermissionGranted={performGpsLookup}
       />
       <script
         type="application/ld+json"

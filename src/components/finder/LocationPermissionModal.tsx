@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { MapPin, NavigationArrow, Shield, Lightning, X, CaretRight, DeviceMobile, Monitor, Warning } from '@phosphor-icons/react';
+import { useState, useEffect } from 'react';
+import { MapPin, NavigationArrow, Shield, Lightning, CaretRight, DeviceMobile, Monitor, Warning } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -8,19 +8,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { LocationPermissionStatus } from '@/hooks/useLocationPermission';
+import { LocationPermissionStatus, ModalOpenReason } from '@/hooks/useLocationPermission';
 
 interface LocationPermissionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   permissionStatus: LocationPermissionStatus;
+  modalOpenReason: ModalOpenReason;
   onRequestPermission: () => Promise<boolean>;
-  onSkip: () => void;
+  onMarkSeen: (action?: 'skipped' | 'granted') => void;
+  onPermissionGranted: () => void;
 }
 
-function FeatureItem({ icon: Icon, title, description }: { 
-  icon: React.ElementType; 
-  title: string; 
+function FeatureItem({ icon: Icon, title, description }: {
+  icon: React.ElementType;
+  title: string;
   description: string;
 }) {
   return (
@@ -38,7 +40,6 @@ function FeatureItem({ icon: Icon, title, description }: {
 
 function EnableInstructions() {
   const userAgent = typeof navigator === 'undefined' ? '' : navigator.userAgent;
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(userAgent);
   const isIOS = /iPhone|iPad|iPod/i.test(userAgent);
   const isAndroid = /Android/i.test(userAgent);
 
@@ -48,7 +49,7 @@ function EnableInstructions() {
         <Warning className="h-5 w-5" />
         <span className="font-medium text-sm">Location access was denied</span>
       </div>
-      
+
       <p className="text-sm text-muted-foreground">
         To use GPS-based postal code lookup, you'll need to enable location access in your settings:
       </p>
@@ -110,13 +111,23 @@ export function LocationPermissionModal({
   open,
   onOpenChange,
   permissionStatus,
+  modalOpenReason,
   onRequestPermission,
-  onSkip,
+  onMarkSeen,
+  onPermissionGranted,
 }: LocationPermissionModalProps) {
   const [showDeniedInstructions, setShowDeniedInstructions] = useState(false);
   const isBrowserDenied = permissionStatus === 'denied';
   const isUnavailable = permissionStatus === 'unavailable';
-  const isDenied = showDeniedInstructions || isBrowserDenied || isUnavailable;
+
+  // Show denied instructions directly only when:
+  // - User clicked GPS button AND browser has already denied (settings change needed)
+  // - OR user just tried to enable and got denied (showDeniedInstructions)
+  // - OR geolocation is unavailable
+  const isDenied =
+    showDeniedInstructions ||
+    isUnavailable ||
+    (modalOpenReason === 'gps-attempt' && isBrowserDenied);
 
   useEffect(() => {
     if (open) {
@@ -127,15 +138,15 @@ export function LocationPermissionModal({
   const handleEnableLocation = async () => {
     const success = await onRequestPermission();
     if (success) {
-      onOpenChange(false);
+      onMarkSeen('granted');
+      onPermissionGranted();
       return;
     }
     setShowDeniedInstructions(true);
   };
 
   const handleSkip = () => {
-    onSkip();
-    onOpenChange(false);
+    onMarkSeen('skipped');
   };
 
   return (
@@ -151,7 +162,7 @@ export function LocationPermissionModal({
               {isDenied ? 'Enable Location Access' : 'Welcome! Enable Location'}
             </DialogTitle>
             <DialogDescription className="text-sm">
-              {isDenied 
+              {isDenied
                 ? 'Location access is required for GPS-based postal code lookup.'
                 : 'Get your Nigerian postal code instantly with GPS accuracy.'
               }
@@ -167,17 +178,17 @@ export function LocationPermissionModal({
             <>
               {/* Benefits */}
               <div className="space-y-4">
-                <FeatureItem 
+                <FeatureItem
                   icon={NavigationArrow}
                   title="Instant GPS Location"
                   description="One-tap postal code lookup using your device's GPS"
                 />
-                <FeatureItem 
+                <FeatureItem
                   icon={Lightning}
                   title="High Accuracy"
                   description="GPS provides the most accurate location data"
                 />
-                <FeatureItem 
+                <FeatureItem
                   icon={Shield}
                   title="Private & Secure"
                   description="Your location is only used to find your postal code"
@@ -186,41 +197,36 @@ export function LocationPermissionModal({
 
               {/* CTA */}
               <div className="space-y-3">
-                <Button 
-                  onClick={handleEnableLocation} 
+                <Button
+                  onClick={handleEnableLocation}
                   className="w-full h-12 text-base font-semibold gap-2 bg-nigeria-green hover:bg-nigeria-green/90"
                 >
                   <MapPin className="h-5 w-5" />
                   Enable Location Access
                   <CaretRight className="h-4 w-4 ml-auto" />
                 </Button>
-                
-                <Button 
-                  variant="ghost" 
+
+                <Button
+                  variant="ghost"
                   onClick={handleSkip}
                   className="w-full text-muted-foreground hover:text-foreground"
                 >
                   Skip for now - I'll use manual search
                 </Button>
-                {isBrowserDenied && (
-                  <p className="text-xs text-muted-foreground text-center">
-                    If location was previously blocked, tap <strong>Enable Location Access</strong> to continue.
-                  </p>
-                )}
               </div>
             </>
           )}
 
           {isDenied && (
             <div className="flex gap-3">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={handleSkip}
                 className="flex-1"
               >
                 Use Manual Search
               </Button>
-              <Button 
+              <Button
                 onClick={() => window.location.reload()}
                 className="flex-1 bg-nigeria-green hover:bg-nigeria-green/90"
               >
@@ -229,15 +235,6 @@ export function LocationPermissionModal({
             </div>
           )}
         </div>
-
-        {/* Close button */}
-        <button
-          onClick={handleSkip}
-          className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-        >
-          <X className="h-4 w-4" />
-          <span className="sr-only">Close</span>
-        </button>
       </DialogContent>
     </Dialog>
   );
