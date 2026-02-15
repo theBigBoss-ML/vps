@@ -3,6 +3,7 @@ import { LookupStatus } from '@/types/location';
 
 interface LoadingStateProps {
   status: LookupStatus;
+  progressMessage?: string | null;
 }
 
 const statusMessages: Record<LookupStatus, string> = {
@@ -13,13 +14,15 @@ const statusMessages: Record<LookupStatus, string> = {
   error: 'Something went wrong',
 };
 
-export function LoadingState({ status }: LoadingStateProps) {
+export function LoadingState({ status, progressMessage }: LoadingStateProps) {
   if (status === 'idle' || status === 'success' || status === 'error') {
     return null;
   }
 
+  const message = (status === 'detecting' && progressMessage) || statusMessages[status];
+
   return (
-    <div 
+    <div
       className="flex flex-col items-center justify-center py-12 animate-fade-in"
       role="status"
       aria-live="polite"
@@ -31,7 +34,7 @@ export function LoadingState({ status }: LoadingStateProps) {
         </div>
       </div>
       <p className="mt-4 text-muted-foreground font-medium">
-        {statusMessages[status]}
+        {message}
       </p>
       <p className="text-sm text-muted-foreground/70 mt-1">
         This may take a few seconds

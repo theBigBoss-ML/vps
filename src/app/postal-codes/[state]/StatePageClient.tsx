@@ -12,7 +12,9 @@ import { RecentLocations } from '@/components/finder/RecentLocations';
 import { ErrorMessage } from '@/components/finder/ErrorMessage';
 import { LoadingState } from '@/components/finder/LoadingState';
 import { ThemeToggle } from '@/components/finder/ThemeToggle';
+import { LocationPermissionModal } from '@/components/finder/LocationPermissionModal';
 import { useGeolocation } from '@/hooks/useGeolocation';
+import { useLocationPermission } from '@/hooks/useLocationPermission';
 import { useRecentLocations } from '@/hooks/useRecentLocations';
 import { useTheme } from '@/hooks/useTheme';
 import { useUsageStats } from '@/hooks/useUsageStats';
@@ -38,7 +40,17 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
   const { theme, toggleTheme } = useTheme();
   const { trackStat } = useUsageStats();
   const { recentLocations, addRecentLocation, clearRecentLocations } = useRecentLocations();
-  const { getCurrentPosition, error: geoError, clearError, accuracy, accuracyLevel } = useGeolocation();
+  const { getCurrentPosition, error: geoError, clearError, accuracy, accuracyLevel, progressMessage } = useGeolocation();
+  const {
+    permissionStatus,
+    showModal,
+    modalOpenReason,
+    markModalSeen,
+    checkPermission,
+    requestPermission,
+    showModalForGpsAttempt,
+    handleModalOpenChange,
+  } = useLocationPermission();
 
   const [status, setStatus] = useState<LookupStatus>('idle');
   const [result, setResult] = useState<LocationResult | null>(null);
@@ -47,15 +59,25 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
 
   const isLoading = status === 'detecting' || status === 'geocoding';
 
-  const handleDetectLocation = useCallback(async () => {
+  const performGpsLookup = useCallback(async () => {
     setError(null);
-    clearError();
+    setResult(null);
     setStatus('detecting');
 
     const coords = await getCurrentPosition();
     if (!coords) {
+      const latestPermission = await checkPermission();
+      const deniedPermissionMessage =
+        'Location access denied. Please enable location permissions in your browser settings, then try again.';
+      const genericPermissionMessage =
+        'Could not detect location. Please enable location services and try again.';
+      const shouldShowDeniedGuidance = latestPermission === 'denied';
+
       setStatus('error');
-      setError(geoError || 'Could not detect location. Please enable location services and try again.');
+      setError(shouldShowDeniedGuidance ? deniedPermissionMessage : genericPermissionMessage);
+      if (shouldShowDeniedGuidance) {
+        showModalForGpsAttempt();
+      }
       return;
     }
 
@@ -73,15 +95,40 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
           lga: locationResult.lga,
         });
         toast.success('Postal code found!');
-      } else {
-        setError('Could not determine postal code for your location. Try manual search.');
-        setStatus('error');
+        return;
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Location detection failed.');
+      const message =
+        err instanceof Error && err.message
+          ? err.message
+          : 'Google Maps lookup is currently unavailable.';
       setStatus('error');
+      setError(message);
+      return;
     }
-  }, [getCurrentPosition, clearError, geoError, trackStat, addRecentLocation]);
+
+    setStatus('error');
+    setError('Could not find postal code for your location. Try manual search.');
+  }, [getCurrentPosition, checkPermission, addRecentLocation, trackStat, showModalForGpsAttempt]);
+
+  const handleDetectLocation = useCallback(async () => {
+    setError(null);
+    setResult(null);
+
+    const latestPermission = await checkPermission();
+
+    if (latestPermission === 'granted') {
+      return performGpsLookup();
+    }
+
+    if (latestPermission === 'prompt' || latestPermission === 'denied') {
+      showModalForGpsAttempt();
+      return;
+    }
+
+    setStatus('error');
+    setError('Geolocation is not supported by your browser. Please use manual search.');
+  }, [checkPermission, performGpsLookup, showModalForGpsAttempt]);
 
   const handleSmartSearch = useCallback((searchResult: { postalCode: string; area: string; locality: string; lga: string; state: string }) => {
     const locationResult: LocationResult = {
@@ -213,12 +260,16 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
       <header className="border-b border-border/40 bg-card/60 backdrop-blur-xl sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <div className="p-2 bg-primary/15 rounded-xl border border-primary/10">
+              <MapPin className="h-6 w-6 text-primary" aria-hidden="true" />
+            </div>
             <span className="text-lg font-bold text-foreground">Postminer.com.ng</span>
           </Link>
-          <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-3 sm:gap-4">
             <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Home</Link>
-            <Link href="/drop-pin" className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block">Drop Pin</Link>
+            <Link href="/drop-pin" className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block">Find on Map</Link>
             <Link href="/state-maps" className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block">State Maps</Link>
+            <Link href="/postal-codes" className="text-sm text-muted-foreground hover:text-primary transition-colors hidden lg:block">States</Link>
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
           </nav>
         </div>
@@ -228,6 +279,8 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
       <nav className="container mx-auto px-4 py-4 max-w-4xl" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2 text-sm text-muted-foreground">
           <li><Link href="/" className="hover:text-primary transition-colors">Home</Link></li>
+          <li>/</li>
+          <li><Link href="/postal-codes" className="hover:text-primary transition-colors">States</Link></li>
           <li>/</li>
           <li className="text-foreground font-medium">{data.name} Postal Code</li>
         </ol>
@@ -259,7 +312,7 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
               onFeedback={handleFeedback}
             />
           ) : isLoading ? (
-            <LoadingState status={status} />
+            <LoadingState status={status} progressMessage={progressMessage} />
           ) : (
             <div className="space-y-6">
               {(error || geoError) && (
@@ -319,7 +372,7 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
                   className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm bg-card border border-border/40 rounded-lg hover:border-primary/40 transition-colors"
                 >
                   <MapPin className="h-4 w-4 text-primary" />
-                  Drop a Pin on Map
+                  Find on Map
                 </Link>
                 <Link
                   href="/state-maps"
@@ -335,11 +388,11 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
 
         {/* State Overview */}
         <section className="border-t border-border/30">
-          <div className="container mx-auto px-4 py-12 md:py-16 max-w-4xl">
+          <div className="container mx-auto px-4 py-12 md:py-16 max-w-4xl text-center">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
               About {data.name} Postal Codes
             </h2>
-            <div className="text-sm md:text-base text-muted-foreground leading-relaxed space-y-4 text-left">
+            <div className="text-sm md:text-base text-muted-foreground leading-relaxed space-y-4 text-left max-w-3xl mx-auto">
               {data.description.split('\n\n').map((paragraph, i) => (
                 <p key={i}>{paragraph}</p>
               ))}
@@ -369,11 +422,11 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
 
         {/* LGA Reference */}
         <section className="border-t border-border/30">
-          <div className="container mx-auto px-4 py-12 md:py-16 max-w-4xl">
+          <div className="container mx-auto px-4 py-12 md:py-16 max-w-4xl text-center">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
               Local Government Areas in {data.name}
             </h2>
-            <p className="text-sm text-muted-foreground mb-6">
+            <p className="text-sm text-muted-foreground mb-6 max-w-3xl mx-auto">
               {data.name} has {data.lgaCount} LGAs, each with their own postal codes within the {data.postalCodeRange} range.
               Instead of scrolling through a list, just{' '}
               <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-primary hover:underline">
@@ -393,7 +446,7 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
 
         {/* FAQ */}
         <section className="border-t border-border/30">
-          <div className="container mx-auto px-4 py-12 md:py-16 max-w-4xl">
+          <div className="container mx-auto px-4 py-12 md:py-16 max-w-4xl text-center">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
               Frequently Asked Questions — {data.name} Postal Codes
             </h2>
@@ -413,7 +466,7 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
         {/* Related States */}
         {relatedStates.length > 0 && (
           <section className="border-t border-border/30">
-            <div className="container mx-auto px-4 py-12 md:py-16 max-w-4xl">
+            <div className="container mx-auto px-4 py-12 md:py-16 max-w-4xl text-center">
               <h2 className="text-xl md:text-2xl font-bold text-foreground mb-6">
                 Nearby States
               </h2>
@@ -422,7 +475,7 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
                   <Link
                     key={rs.slug}
                     href={`/postal-codes/${rs.slug}`}
-                    className="p-4 bg-card/50 border border-border/40 rounded-lg hover:border-primary/40 transition-colors group"
+                    className="p-4 bg-card/50 border border-border/40 rounded-lg hover:border-primary/40 transition-colors group text-left"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-semibold text-foreground">{rs.name}</span>
@@ -439,12 +492,64 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
         )}
       </main>
 
+      {/* Location Permission Modal */}
+      <LocationPermissionModal
+        open={showModal}
+        onOpenChange={handleModalOpenChange}
+        permissionStatus={permissionStatus}
+        modalOpenReason={modalOpenReason}
+        onRequestPermission={requestPermission}
+        onMarkSeen={markModalSeen}
+        onPermissionGranted={performGpsLookup}
+      />
+
       {/* Footer */}
-      <footer className="border-t border-border/40 py-8 bg-card/30">
-        <div className="container mx-auto px-4 max-w-4xl text-center">
-          <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} Postminer.com.ng. All rights reserved.
-          </p>
+      <footer className="border-t border-border/40 py-8 md:py-12 bg-card/30">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="col-span-1 sm:col-span-2 lg:col-span-1">
+              <Link href="/" className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
+                <div className="p-1.5 bg-primary/15 rounded-lg border border-primary/10">
+                  <MapPin className="h-4 w-4 text-primary" />
+                </div>
+                <h3 className="text-sm font-bold text-foreground">Postminer.com.ng</h3>
+              </Link>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Helping Nigerians find accurate postal codes.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-4">Quick Links</h4>
+              <nav className="flex flex-col gap-3">
+                <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Home</Link>
+                <Link href="/drop-pin" className="text-sm text-muted-foreground hover:text-primary transition-colors">Find on Map</Link>
+                <Link href="/state-maps" className="text-sm text-muted-foreground hover:text-primary transition-colors">State Maps</Link>
+                <Link href="/postal-codes" className="text-sm text-muted-foreground hover:text-primary transition-colors">All States</Link>
+                <Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</Link>
+              </nav>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-4">Top States</h4>
+              <nav className="flex flex-col gap-3">
+                <Link href="/postal-codes/lagos" className="text-sm text-muted-foreground hover:text-primary transition-colors">Lagos Postal Code</Link>
+                <Link href="/postal-codes/fct-abuja" className="text-sm text-muted-foreground hover:text-primary transition-colors">Abuja Postal Code</Link>
+                <Link href="/postal-codes/rivers" className="text-sm text-muted-foreground hover:text-primary transition-colors">Rivers Postal Code</Link>
+                <Link href="/postal-codes/kano" className="text-sm text-muted-foreground hover:text-primary transition-colors">Kano Postal Code</Link>
+                <Link href="/postal-codes/oyo" className="text-sm text-muted-foreground hover:text-primary transition-colors">Oyo Postal Code</Link>
+              </nav>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-4">About</h4>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Helping Nigerians find accurate postal codes.
+              </p>
+            </div>
+          </div>
+          <div className="border-t border-border/30 mt-8 pt-6">
+            <p className="text-sm text-muted-foreground text-center sm:text-left">
+              &copy; {new Date().getFullYear()} Postminer.com.ng. All rights reserved.
+            </p>
+          </div>
         </div>
       </footer>
 

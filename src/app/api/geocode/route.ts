@@ -95,20 +95,28 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 10000);
+
     const response = await fetch(
       `${GEOCODE_API_URL}?latlng=${lat},${lng}&key=${apiKey}`,
-      { cache: 'no-store' }
+      { cache: 'no-store', signal: controller.signal }
     );
+    clearTimeout(timer);
+
     const data = await response.json();
     const result = buildLocationResult(data, lat, lng);
 
     return NextResponse.json({ result });
   } catch (error) {
     console.error('Geocoding error:', error);
+    const isTimeout = error instanceof DOMException && error.name === 'AbortError';
     return NextResponse.json(
       {
         error: 'geocoding_failed',
-        message: 'Unable to reach Google Maps Geocoding API.',
+        message: isTimeout
+          ? 'Google Maps API request timed out. Please try again.'
+          : 'Unable to reach Google Maps Geocoding API.',
       },
       { status: 502 }
     );

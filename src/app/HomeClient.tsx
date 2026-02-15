@@ -199,7 +199,7 @@ const Index = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('gps');
 
-  const { getCurrentPosition, error: geoError, clearError, accuracy, accuracyLevel } = useGeolocation();
+  const { getCurrentPosition, error: geoError, clearError, accuracy, accuracyLevel, progressMessage } = useGeolocation();
   const { recentLocations, addRecentLocation, clearRecentLocations } = useRecentLocations();
   const { theme, toggleTheme } = useTheme();
   const { stats, loading: statsLoading, trackStat } = useUsageStats();
@@ -214,13 +214,6 @@ const Index = () => {
     handleModalOpenChange,
   } = useLocationPermission();
   const homepageGuide = getBlogPostBySlug('nipost-mail-postal-services-nigeria');
-  const guidePublishedDate = homepageGuide
-    ? new Date(homepageGuide.publishedAt).toLocaleDateString('en-NG', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    : null;
 
   const performGpsLookup = useCallback(async () => {
     setError(null);
@@ -237,7 +230,7 @@ const Index = () => {
       const shouldShowDeniedGuidance = latestPermission === 'denied';
 
       setStatus('error');
-      setError(geoError || (shouldShowDeniedGuidance ? deniedPermissionMessage : genericPermissionMessage));
+      setError(shouldShowDeniedGuidance ? deniedPermissionMessage : genericPermissionMessage);
       if (shouldShowDeniedGuidance) {
         showModalForGpsAttempt();
       }
@@ -272,7 +265,7 @@ const Index = () => {
 
     setStatus('error');
     setError('Could not find postal code for your location. Try manual search.');
-  }, [getCurrentPosition, checkPermission, geoError, addRecentLocation, trackStat, showModalForGpsAttempt]);
+  }, [getCurrentPosition, checkPermission, addRecentLocation, trackStat, showModalForGpsAttempt]);
 
   const handleDetectLocation = useCallback(async () => {
     setError(null);
@@ -559,7 +552,7 @@ const Index = () => {
               href="/drop-pin"
               className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block"
             >
-              Drop Pin
+              Find on Map
             </Link>
             <Link
               href="/state-maps"
@@ -568,7 +561,7 @@ const Index = () => {
               State Maps
             </Link>
             <Link
-              href="/postal-codes/lagos"
+              href="/postal-codes"
               className="text-sm text-muted-foreground hover:text-primary transition-colors hidden lg:block"
             >
               States
@@ -597,7 +590,7 @@ const Index = () => {
           </div>
         ) : isLoading ? (
           <div className="container mx-auto px-4 py-8 max-w-lg">
-            <LoadingState status={status} />
+            <LoadingState status={status} progressMessage={progressMessage} />
           </div>
         ) : (
           /* ── Hero Section ─────────────────────────────── */
@@ -989,12 +982,8 @@ const Index = () => {
         <section id="nipost-guide" className="border-t border-border/30 bg-gradient-to-b from-card/10 to-background">
           <div className="container mx-auto px-4 py-12 md:py-16 max-w-4xl text-center">
             <AnimatedSection className="space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full border border-primary/15">
-                <BookOpen className="h-3 w-3" />
-                Postal Services Guide
-              </div>
               <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-                How Nigeria&apos;s Postal System Works
+                How Nigeria&apos;s Postal System Works in {new Date().getFullYear()}
               </h2>
               <p className="text-sm md:text-base text-muted-foreground leading-relaxed max-w-3xl mx-auto">
                 NIPOST (Nigerian Postal Service) handles letters, parcels, and official postal products. Here is what you need to know about
@@ -1034,7 +1023,6 @@ const Index = () => {
                 <BookOpen className="h-4 w-4" />
                 <span>
                   Read the complete NIPOST services guide
-                  {guidePublishedDate ? ` (${guidePublishedDate})` : ''}
                 </span>
               </Link>
             </div>
@@ -1082,9 +1070,11 @@ const Index = () => {
               <h4 className="text-sm font-semibold text-foreground mb-4">Quick Links</h4>
               <nav className="flex flex-col gap-3">
                 <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Home</Link>
-                <Link href="/drop-pin" className="text-sm text-muted-foreground hover:text-primary transition-colors">Drop Pin</Link>
+                <Link href="/drop-pin" className="text-sm text-muted-foreground hover:text-primary transition-colors">Find on Map</Link>
                 <Link href="/state-maps" className="text-sm text-muted-foreground hover:text-primary transition-colors">State Maps</Link>
-                <Link href="/#nipost-guide" className="text-sm text-muted-foreground hover:text-primary transition-colors">NIPOST Guide</Link>
+                <Link href="/postal-codes" className="text-sm text-muted-foreground hover:text-primary transition-colors">All States</Link>
+                <Link href="/#nipost-guide" className="text-sm text-muted-foreground hover:text-primary transition-colors">How NIPOST Works</Link>
+                <Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</Link>
               </nav>
             </div>
 
@@ -1095,14 +1085,15 @@ const Index = () => {
                 <Link href="/postal-codes/fct-abuja" className="text-sm text-muted-foreground hover:text-primary transition-colors">Abuja Postal Code</Link>
                 <Link href="/postal-codes/rivers" className="text-sm text-muted-foreground hover:text-primary transition-colors">Rivers Postal Code</Link>
                 <Link href="/postal-codes/kano" className="text-sm text-muted-foreground hover:text-primary transition-colors">Kano Postal Code</Link>
-                <Link href="/blog/history-of-nigerian-postal-services" className="text-sm text-muted-foreground hover:text-primary transition-colors">Postal History</Link>
+                <Link href="/postal-codes/oyo" className="text-sm text-muted-foreground hover:text-primary transition-colors">Oyo Postal Code</Link>
+                <Link href="/postal-codes/ogun" className="text-sm text-muted-foreground hover:text-primary transition-colors">Ogun Postal Code</Link>
               </nav>
             </div>
 
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-4">About</h4>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Helping Nigerians find accurate postal codes since 2024.
+                Helping Nigerians find accurate postal codes.
               </p>
             </div>
           </div>

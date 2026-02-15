@@ -160,11 +160,11 @@ const StateMaps = () => {
             >
               State Maps
             </Link>
-            <Link 
-              href="/#nipost-guide" 
-              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            <Link
+              href="/postal-codes"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block"
             >
-              NIPOST Guide
+              States
             </Link>
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
           </nav>
@@ -499,16 +499,20 @@ const StateMaps = () => {
               <h4 className="text-sm font-semibold text-foreground mb-4">Quick Links</h4>
               <nav className="flex flex-col gap-3">
                 <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Home</Link>
+                <Link href="/drop-pin" className="text-sm text-muted-foreground hover:text-primary transition-colors">Find on Map</Link>
                 <Link href="/state-maps" className="text-sm text-muted-foreground hover:text-primary transition-colors">State Maps</Link>
-                <Link href="/#nipost-guide" className="text-sm text-muted-foreground hover:text-primary transition-colors">NIPOST Guide</Link>
+                <Link href="/postal-codes" className="text-sm text-muted-foreground hover:text-primary transition-colors">All States</Link>
+                <Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</Link>
               </nav>
             </div>
 
-            {/* Resources */}
+            {/* Top States */}
             <div>
-              <h4 className="text-sm font-semibold text-foreground mb-4">Resources</h4>
+              <h4 className="text-sm font-semibold text-foreground mb-4">Top States</h4>
               <nav className="flex flex-col gap-3">
-                <Link href="/#nipost-guide" className="text-sm text-muted-foreground hover:text-primary transition-colors">NIPOST Services</Link>
+                <Link href="/postal-codes/lagos" className="text-sm text-muted-foreground hover:text-primary transition-colors">Lagos Postal Code</Link>
+                <Link href="/postal-codes/fct-abuja" className="text-sm text-muted-foreground hover:text-primary transition-colors">Abuja Postal Code</Link>
+                <Link href="/postal-codes/rivers" className="text-sm text-muted-foreground hover:text-primary transition-colors">Rivers Postal Code</Link>
               </nav>
             </div>
 
@@ -516,7 +520,7 @@ const StateMaps = () => {
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-4">About</h4>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Helping Nigerians find accurate postal codes since 2024.
+                Helping Nigerians find accurate postal codes.
               </p>
             </div>
           </div>
