@@ -22,7 +22,7 @@ import { useUsageStats } from '@/hooks/useUsageStats';
 import { useLocationPermission } from '@/hooks/useLocationPermission';
 import { LocationResult, LookupStatus, RecentLocation } from '@/types/location';
 import { rateLimitedGetPostalCode } from '@/lib/postalCodeService';
-import { getAllBlogPosts } from '@/data/blogPosts';
+import { getAllBlogPosts, getBlogPostBySlug } from '@/data/blogPosts';
 import { toast } from 'sonner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
@@ -213,7 +213,7 @@ const Index = () => {
     showModalForGpsAttempt,
     handleModalOpenChange,
   } = useLocationPermission();
-  const homepageGuide = getAllBlogPosts()[0];
+  const homepageGuide = getBlogPostBySlug('nipost-mail-postal-services-nigeria');
   const guidePublishedDate = homepageGuide
     ? new Date(homepageGuide.publishedAt).toLocaleDateString('en-NG', {
         year: 'numeric',
@@ -574,7 +574,7 @@ const Index = () => {
               States
             </Link>
             <Link
-              href="/blog/history-of-nigerian-postal-services"
+              href="/blog"
               className="text-sm text-muted-foreground hover:text-primary transition-colors hidden lg:block"
             >
               Blog
@@ -753,7 +753,7 @@ const Index = () => {
             <h2 className="text-2xl md:text-3xl font-bold text-foreground">
               What Is a Nigeria Zip Postal Code?
             </h2>
-            <div className="space-y-4 text-sm md:text-base text-muted-foreground leading-relaxed text-left max-w-3xl mx-auto">
+            <div className="space-y-4 text-sm md:text-base text-muted-foreground leading-relaxed text-center max-w-3xl mx-auto">
               <p>
                 So here is the deal. Nigeria uses a 6-digit postal code system. Not 5 digits like the US, not 4. Six digits.
                 And it is officially called a postal code or postcode — the term &ldquo;zip code&rdquo; is actually an American thing.
@@ -784,10 +784,12 @@ const Index = () => {
             <h2 className="text-2xl md:text-3xl font-bold text-foreground">
               Frequently Asked Questions About Nigeria Zip Postal Codes
             </h2>
-            <Accordion type="single" collapsible className="w-full space-y-2 text-left">
+            <Accordion type="single" collapsible className="w-full space-y-2">
               <AccordionItem value="what-is-zip-code" className="border border-border/40 rounded-xl px-4">
-                <AccordionTrigger className="text-left text-sm font-medium">What is the zip code for Nigeria?</AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                <AccordionTrigger className="text-sm font-medium">
+                  <span className="block flex-1 text-center pr-6">What is the zip code for Nigeria?</span>
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground leading-relaxed text-center">
                   Nigeria does not have one single zip code for the entire country. Each area has its own unique 6-digit postal code managed by NIPOST.
                   For instance, central Lagos uses 100001, while Abuja starts at 900001. The exact code depends on your specific street and neighbourhood.
                   Use the <a href="#main-content" className="text-primary hover:underline">GPS tool above</a> to get the right one for your location.
@@ -795,8 +797,10 @@ const Index = () => {
               </AccordionItem>
 
               <AccordionItem value="lagos-zip-code" className="border border-border/40 rounded-xl px-4">
-                <AccordionTrigger className="text-left text-sm font-medium">What is the zip code for Lagos, Nigeria?</AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                <AccordionTrigger className="text-sm font-medium">
+                  <span className="block flex-1 text-center pr-6">What is the zip code for Lagos, Nigeria?</span>
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground leading-relaxed text-center">
                   Lagos postal codes range from 100001 to 112005. There is no single code for all of Lagos because the state covers a massive area with
                   20 local government areas. Ikeja uses a different code from Victoria Island, and Surulere is different from Ikorodu.
                   The fastest way to get your exact Lagos postal code is to tap the GPS button — it picks up your location and returns the right code in seconds.
@@ -804,16 +808,20 @@ const Index = () => {
               </AccordionItem>
 
               <AccordionItem value="abuja-zip-code" className="border border-border/40 rounded-xl px-4">
-                <AccordionTrigger className="text-left text-sm font-medium">What is the zip code for Abuja?</AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                <AccordionTrigger className="text-sm font-medium">
+                  <span className="block flex-1 text-center pr-6">What is the zip code for Abuja?</span>
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground leading-relaxed text-center">
                   Abuja (FCT) postal codes start at 900001. Each area council — Garki, Wuse, Maitama, Kubwa, Gwagwalada — has its own code.
                   If you need your specific Abuja postal code, the quickest route is GPS detection right here on this page. It works across all FCT area councils.
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="does-nigeria-have-zip" className="border border-border/40 rounded-xl px-4">
-                <AccordionTrigger className="text-left text-sm font-medium">Does Nigeria have zip codes?</AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                <AccordionTrigger className="text-sm font-medium">
+                  <span className="block flex-1 text-center pr-6">Does Nigeria have zip codes?</span>
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground leading-relaxed text-center">
                   Yes, but they are officially called postal codes or postcodes. The term &ldquo;zip code&rdquo; is American — Nigeria uses the term postal code.
                   The system is managed by NIPOST, covers all 36 states plus FCT, and uses a 6-digit format. So when a form asks for your zip code,
                   just enter your Nigerian postal code.
@@ -821,16 +829,20 @@ const Index = () => {
               </AccordionItem>
 
               <AccordionItem value="zip-vs-postal" className="border border-border/40 rounded-xl px-4">
-                <AccordionTrigger className="text-left text-sm font-medium">What is the difference between a zip code and a postal code?</AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                <AccordionTrigger className="text-sm font-medium">
+                  <span className="block flex-1 text-center pr-6">What is the difference between a zip code and a postal code?</span>
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground leading-relaxed text-center">
                   They are the same thing, just different names. The United States calls theirs zip codes. Nigeria, the UK, and most other countries
                   call them postal codes or postcodes. If you see a form field labelled &ldquo;zip/postal code,&rdquo; your Nigerian postal code works just fine.
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="23401-myth" className="border border-border/40 rounded-xl px-4">
-                <AccordionTrigger className="text-left text-sm font-medium">Is 23401 or 23402 Nigeria&apos;s zip code?</AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                <AccordionTrigger className="text-sm font-medium">
+                  <span className="block flex-1 text-center pr-6">Is 23401 or 23402 Nigeria&apos;s zip code?</span>
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground leading-relaxed text-center">
                   No. This is one of the most common misconceptions. 23401 and 23402 are not valid Nigerian postal codes — they are only 5 digits,
                   while Nigerian postal codes are 6 digits. This myth spread from PayPal and similar platforms. Your actual postal code is specific to your
                   area, and you can find it instantly using the tool on this page.
@@ -838,8 +850,10 @@ const Index = () => {
               </AccordionItem>
 
               <AccordionItem value="how-to-find" className="border border-border/40 rounded-xl px-4">
-                <AccordionTrigger className="text-left text-sm font-medium">How do I find my zip code in Nigeria?</AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                <AccordionTrigger className="text-sm font-medium">
+                  <span className="block flex-1 text-center pr-6">How do I find my zip code in Nigeria?</span>
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground leading-relaxed text-center">
                   Three ways, all on this page. First, tap the GPS button and your postal code appears based on your current location. Second, type your
                   address into the smart search field and select the match. Third, use the{' '}
                   <Link href="/drop-pin" className="text-primary hover:underline">drop-pin map</Link> to click on any location in Nigeria.
@@ -848,8 +862,10 @@ const Index = () => {
               </AccordionItem>
 
               <AccordionItem value="international-code" className="border border-border/40 rounded-xl px-4">
-                <AccordionTrigger className="text-left text-sm font-medium">What is Nigeria&apos;s international postal code?</AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                <AccordionTrigger className="text-sm font-medium">
+                  <span className="block flex-1 text-center pr-6">What is Nigeria&apos;s international postal code?</span>
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground leading-relaxed text-center">
                   There is no single &ldquo;international postal code&rdquo; for Nigeria. When filling out international forms or shipping labels,
                   you need to enter the specific postal code for your address. Each area in Nigeria has its own code. Use GPS detection here to
                   get the right one, and use that on any form — domestic or international.
@@ -857,16 +873,20 @@ const Index = () => {
               </AccordionItem>
 
               <AccordionItem value="how-many-digits" className="border border-border/40 rounded-xl px-4">
-                <AccordionTrigger className="text-left text-sm font-medium">How many digits is a Nigerian postal code?</AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                <AccordionTrigger className="text-sm font-medium">
+                  <span className="block flex-1 text-center pr-6">How many digits is a Nigerian postal code?</span>
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground leading-relaxed text-center">
                   Exactly 6 digits. The first digit represents your NIPOST postal zone (1 through 9). The second and third digits identify
                   the dispatch district. And the last three digits pinpoint your specific delivery area. The full range is 100001 (Lagos) to 982002.
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="western-union" className="border border-border/40 rounded-xl px-4">
-                <AccordionTrigger className="text-left text-sm font-medium">Can I use Nigeria zip code for Western Union?</AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                <AccordionTrigger className="text-sm font-medium">
+                  <span className="block flex-1 text-center pr-6">Can I use Nigeria zip code for Western Union?</span>
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground leading-relaxed text-center">
                   Yes. When Western Union asks for a zip or postal code, enter your actual 6-digit Nigerian postal code — the one for your specific location.
                   Do not use 23401 or any made-up number. An incorrect code can cause issues with your transaction. Find your correct code using the GPS tool above.
                 </AccordionContent>
@@ -948,7 +968,7 @@ const Index = () => {
             <h2 className="text-2xl md:text-3xl font-bold text-foreground">
               A Brief History of Nigerian Postal Services
             </h2>
-            <div className="space-y-4 text-sm md:text-base text-muted-foreground leading-relaxed text-left max-w-3xl mx-auto">
+            <div className="space-y-4 text-sm md:text-base text-muted-foreground leading-relaxed text-center max-w-3xl mx-auto">
               <p>
                 The history of postal services in Nigeria goes way back — 1852, to be exact. That is when the British Colonial Administration
                 established the first post office. At the time, it was basically a branch of London&apos;s General Post Office, and it stayed that way until 1874.
@@ -1019,12 +1039,24 @@ const Index = () => {
                 },
               ].map((card, i) => (
                 <AnimatedSection key={card.title} delay={i * 0.1}>
-                  <article className="p-5 bg-card/50 border border-border/40 rounded-xl card-hover h-full text-left">
+                  <article className="p-5 bg-card/50 border border-border/40 rounded-xl card-hover h-full text-center">
                     <h3 className="text-sm font-semibold text-foreground mb-2">{card.title}</h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">{card.text}</p>
                   </article>
                 </AnimatedSection>
               ))}
+            </div>
+            <div className="mt-8">
+              <Link
+                href={`/blog/${homepageGuide.slug}`}
+                className="inline-flex items-center gap-2 text-sm text-primary hover:underline font-medium"
+              >
+                <BookOpen className="h-4 w-4" />
+                <span>
+                  Read the complete NIPOST services guide
+                  {guidePublishedDate ? ` (${guidePublishedDate})` : ''}
+                </span>
+              </Link>
             </div>
           </div>
         </section>
@@ -1096,7 +1128,7 @@ const Index = () => {
           </div>
 
           <div className="gradient-divider mt-8 mb-6" />
-          <p className="text-sm text-muted-foreground text-center sm:text-left">
+          <p className="text-sm text-muted-foreground text-center">
             (c) {new Date().getFullYear()} Postminer.com.ng. All rights reserved.
           </p>
         </div>

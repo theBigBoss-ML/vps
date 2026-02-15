@@ -314,18 +314,18 @@ const DropPin = () => {
         </div>
 
         {/* Instructions */}
-        <div className="p-4 rounded-xl bg-gradient-to-r from-secondary to-secondary/50 border border-border mb-6">
+        <div className="p-4 rounded-xl bg-gradient-to-r from-secondary to-secondary/50 border border-border mb-6 text-center">
           <h3 className="text-sm font-semibold text-primary mb-3">How It Works:</h3>
           <ol className="space-y-2 text-sm text-muted-foreground">
-            <li className="flex items-center gap-2">
+            <li className="flex items-center justify-center gap-2">
               <span className="w-5 h-5 bg-primary/20 text-primary rounded-full flex items-center justify-center text-xs font-bold">1</span>
               <span>Click anywhere on the map below</span>
             </li>
-            <li className="flex items-center gap-2">
+            <li className="flex items-center justify-center gap-2">
               <span className="w-5 h-5 bg-primary/20 text-primary rounded-full flex items-center justify-center text-xs font-bold">2</span>
               <span>We'll drop a pin at that location</span>
             </li>
-            <li className="flex items-center gap-2">
+            <li className="flex items-center justify-center gap-2">
               <span className="w-5 h-5 bg-primary/20 text-primary rounded-full flex items-center justify-center text-xs font-bold">3</span>
               <span>Get the postal code instantly</span>
             </li>
@@ -361,14 +361,14 @@ const DropPin = () => {
 
         {/* Results Display */}
         {currentPin && (
-          <div className="bg-card border border-border rounded-xl p-6 mb-6 shadow-sm">
-            <h3 className="text-lg font-bold text-primary flex items-center gap-2 mb-4">
+          <div className="bg-card border border-border rounded-xl p-6 mb-6 shadow-sm text-center">
+            <h3 className="text-lg font-bold text-primary flex items-center justify-center gap-2 mb-4">
               <MapPin className="h-5 w-5" />
               Pin Dropped Successfully
             </h3>
             
             <div className="space-y-3 mb-6">
-              <div className="flex justify-between items-start py-2 border-b border-border">
+              <div className="flex flex-col items-center gap-1 py-2 border-b border-border text-center">
                 <span className="text-sm font-medium text-muted-foreground">Coordinates:</span>
                 <span className="text-sm font-mono text-foreground">
                   {currentPin.lat.toFixed(6)}, {currentPin.lng.toFixed(6)}
@@ -376,14 +376,14 @@ const DropPin = () => {
               </div>
               
               {currentPin.address && (
-                <div className="flex justify-between items-start py-2 border-b border-border">
+                <div className="flex flex-col items-center gap-1 py-2 border-b border-border text-center">
                   <span className="text-sm font-medium text-muted-foreground">Address:</span>
-                  <span className="text-sm text-foreground text-right max-w-[60%]">{currentPin.address}</span>
+                  <span className="text-sm text-foreground text-center max-w-[60%]">{currentPin.address}</span>
                 </div>
               )}
               
               {currentPin.state && (
-                <div className="flex justify-between items-start py-2 border-b border-border">
+                <div className="flex flex-col items-center gap-1 py-2 border-b border-border text-center">
                   <span className="text-sm font-medium text-muted-foreground">State:</span>
                   <span className="text-sm text-foreground">{currentPin.state}</span>
                 </div>
@@ -510,7 +510,7 @@ const DropPin = () => {
           </div>
 
           <div className="border-t border-border/50 mt-8 pt-6">
-            <p className="text-sm text-muted-foreground text-center sm:text-left">
+            <p className="text-sm text-muted-foreground text-center">
               (c) {new Date().getFullYear()} Postminer.com.ng. All rights reserved.
             </p>
           </div>

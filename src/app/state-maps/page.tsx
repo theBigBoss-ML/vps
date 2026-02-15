@@ -190,7 +190,7 @@ const StateMaps = () => {
 
         {/* Info Box */}
         <div className="p-4 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 mb-8">
-          <div className="flex items-start gap-3">
+          <div className="flex flex-col items-center gap-2 text-center">
             <div className="p-1.5 rounded-md bg-primary/20 shrink-0">
               <Info className="h-4 w-4 text-primary" />
             </div>
@@ -264,30 +264,30 @@ const StateMaps = () => {
 
         {/* Instructions (shown before map loads) */}
         {!mapLoaded && !isLoadingMap && !stateMapUrl && (
-          <div className="p-6 rounded-xl bg-gradient-to-r from-secondary to-secondary/50 border border-border">
+          <div className="p-6 rounded-xl bg-gradient-to-r from-secondary to-secondary/50 border border-border text-center">
             <h3 className="text-lg font-semibold text-primary mb-4">How to Use:</h3>
             <ul className="space-y-3">
-              <li className="flex items-start gap-3 text-sm text-foreground/80">
+              <li className="flex items-center justify-center gap-2 text-sm text-foreground/80 text-center">
                 <span className="text-lg">*</span>
                 <span>Select your state from the dropdown above</span>
               </li>
-              <li className="flex items-start gap-3 text-sm text-foreground/80">
+              <li className="flex items-center justify-center gap-2 text-sm text-foreground/80 text-center">
                 <span className="text-lg">*</span>
                 <span>Click "View Map" to load the postal code map</span>
               </li>
-              <li className="flex items-start gap-3 text-sm text-foreground/80">
+              <li className="flex items-center justify-center gap-2 text-sm text-foreground/80 text-center">
                 <span className="text-lg">*</span>
                 <span>Use [+] [-] buttons to zoom in and out</span>
               </li>
-              <li className="flex items-start gap-3 text-sm text-foreground/80">
+              <li className="flex items-center justify-center gap-2 text-sm text-foreground/80 text-center">
                 <span className="text-lg">*</span>
                 <span>Click and drag to pan around the map</span>
               </li>
-              <li className="flex items-start gap-3 text-sm text-foreground/80">
+              <li className="flex items-center justify-center gap-2 text-sm text-foreground/80 text-center">
                 <span className="text-lg">*</span>
                 <span>Postal codes are marked on the map</span>
               </li>
-              <li className="flex items-start gap-3 text-sm text-foreground/80">
+              <li className="flex items-center justify-center gap-2 text-sm text-foreground/80 text-center">
                 <span className="text-lg">*</span>
                 <span>Download the map for offline reference</span>
               </li>
@@ -421,7 +421,7 @@ const StateMaps = () => {
 
             {/* Map Information Panel */}
             {mapLoaded && (
-              <div className="p-6 rounded-xl bg-card border border-border space-y-4">
+              <div className="p-6 rounded-xl bg-card border border-border space-y-4 text-center">
                 <h4 className="text-lg font-semibold text-primary">About This Map</h4>
                 <p className="text-sm text-muted-foreground">
                   This is the official NIPOST postal code map for {selectedStateName} State. 
@@ -432,15 +432,15 @@ const StateMaps = () => {
                 <div className="p-4 rounded-lg bg-muted/50">
                   <h5 className="text-sm font-semibold text-foreground mb-3">Map Legend:</h5>
                   <ul className="space-y-2">
-                    <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <li className="flex items-center justify-center gap-2 text-sm text-muted-foreground text-center">
                       <span>*</span>
                       <span>Colored regions: Different LGAs</span>
                     </li>
-                    <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <li className="flex items-center justify-center gap-2 text-sm text-muted-foreground text-center">
                       <span>*</span>
                       <span>Numbers on map: Postal codes</span>
                     </li>
-                    <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <li className="flex items-center justify-center gap-2 text-sm text-muted-foreground text-center">
                       <span>*</span>
                       <span>Boundary lines: LGA borders</span>
                     </li>
@@ -448,7 +448,7 @@ const StateMaps = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <div className="flex flex-col sm:flex-row gap-3 pt-2 justify-center">
                   <Button 
                     variant="outline" 
                     onClick={resetView}
@@ -523,7 +523,7 @@ const StateMaps = () => {
 
           {/* Copyright */}
           <div className="border-t border-border/50 mt-8 pt-6">
-            <p className="text-sm text-muted-foreground text-center sm:text-left">
+            <p className="text-sm text-muted-foreground text-center">
               (c) {new Date().getFullYear()} Postminer.com.ng. All rights reserved.
             </p>
           </div>

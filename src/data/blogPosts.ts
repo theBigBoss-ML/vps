@@ -1,5 +1,15 @@
 import { BlogPost, generateTableOfContents, calculateReadingTime } from '@/types/blog';
 
+type BlogPostDraft = Omit<BlogPost, 'readingTime' | 'tableOfContents'>;
+
+function buildPost(draft: BlogPostDraft): BlogPost {
+  return {
+    ...draft,
+    readingTime: calculateReadingTime(draft.content),
+    tableOfContents: generateTableOfContents(draft.content),
+  };
+}
+
 const nipostServicesContent = `
 The Nigerian Postal Service (NIPOST) is the national carrier of all classes of mail items for delivery both within and outside Nigeria. Mail items, which include letters, postcards, printed papers, parcels and aerogrammes are processed through the post office.
 
@@ -106,7 +116,119 @@ NIPOST appoints paid postal agents in areas where a post office is not available
 Post office identity cards are issued to NIPOST customers as a means of identifying them in their day to day transactions with the post office.
 `;
 
-const nipostPost: BlogPost = {
+const historyOfNigerianPostalServicesContent = `
+The history of postal services and addressing in Nigeria is a long institutional journey. The postal network started in the colonial era, expanded through independence, and later evolved into NIPOST and a national addressing policy.
+
+## The Beginning - Colonial Era (1852-1899)
+
+### 1852 - First Post Office in Nigeria
+
+The first post office in what is now Nigeria was established in 1852 by the British Colonial Administration. At that stage, the service operated as part of the British postal system.
+
+### 1862 - Post Office Becomes a Full Department
+
+By 1862, the post office had become a full government department. This marked the beginning of a more structured and locally administered postal operation.
+
+### 1887 to 1899 - Royal Niger Company Expansion
+
+The Royal Niger Company developed parallel postal facilities in key trade locations. Offices were set up at Akassa (1887), Calabar (1891), Burutu (1897), and Lokoja (1899), with weekly mail boat connections to Lagos.
+
+### 1892 - Universal Postal Union Link
+
+In 1892, the Royal Niger Company became a member of the Universal Postal Union. That membership improved cross-border postal integration and aligned Nigerian mail operations with global postal standards of that era.
+
+### 1898 - Wider Office Rollout in the South-West
+
+By 1898, British postal offices had also spread to towns including Badagry, Epe, Ikorodu, Ijebu-Ode, Ibadan, and Abeokuta. This helped connect administrative and commercial centers more reliably.
+
+## Early Post Office Expansion (1900-1960)
+
+### 1900 - Southern Nigeria Government Takes Over
+
+From January 1, 1900, the Southern Nigeria Government assumed direct responsibility for operating the postal system. Transport limitations meant mail often moved by canoes, launches, and runners at long intervals.
+
+### 1906 - 27 Post Offices in Operation
+
+By 1906, Nigeria had grown to 27 post offices. This was a major increase from the earliest colonial footprint and signaled growing dependence on formal postal communication.
+
+### 1907 - Postal Orders at District Headquarters
+
+From 1907, British postal orders were sold and cashed at post offices located in district headquarters. This added early financial transaction capability to the postal network.
+
+### 1925 - First Outbound Airmail Movement
+
+In 1925, Royal Air Force aircraft carried outbound mail from Kano to Cairo. This marked an important transition from purely surface-based movement to an aviation-assisted postal channel.
+
+### 1931 - Internal Airmail Services Begin
+
+In 1931, internal airmail services began in Nigeria. This improved inter-city mail speed and reduced dependency on slower road and water routes.
+
+### 1960 - Scale at Independence
+
+At independence in 1960, Nigeria had expanded to 176 post offices, 10 sub-post offices, and about 1,000 postal agencies. The system had become a significant national communications infrastructure.
+
+## Post-Independence Institution Building (1960-1992)
+
+### 1966 - Quasi-Commercial Reform
+
+Through Decree No. 22 of 1966, the combined post and telecommunications department was transformed into a quasi-commercial organization. The aim was to improve efficiency and responsiveness.
+
+### 1985 - Postal and Telecom Split
+
+On January 1, 1985, the establishment of NITEL separated telecommunications from postal operations. This restructuring created a distinct Nigeria Postal Service Department.
+
+### 1987 - NIPOST as Extra-Ministerial Department
+
+Decree No. 18 of 1987 established NIPOST as an Extra-Ministerial Department with defined mandates, including mail conveyance, money order systems, philatelic services, stamp production, and international postal representation.
+
+### 1992 - NIPOST as Government Parastatal
+
+Decree 41 of 1992 classified NIPOST as a Government Parastatal. This gave NIPOST broader operational autonomy over tariffs, service expansion, and postal office development.
+
+## Addressing System Challenges in Nigeria
+
+### 2005 - Addressing Recognized as Core Civic Infrastructure
+
+Street naming and property numbering became more prominent as policy concerns. Public-sector and development institutions emphasized that reliable addressing is foundational for governance, commerce, and service delivery.
+
+### Pre-Reform Period - Fragmented Local Standards
+
+Before a national framework matured, addressing practice was inconsistent across states and local governments. Different conventions and data formats created operational friction for national-scale delivery and identity systems.
+
+## National Addressing Policy Milestones (2004-2014)
+
+### 2004 - Early Federal Coordination Attempts
+
+The Ministry of Housing and Urban Development began coordination efforts with states and local governments to improve addressing consistency and implementation.
+
+### 2009 - Strategic Workshop on National Addressing
+
+A major workshop with the theme "Addressing as a Strategic Infrastructure for National Development" helped align stakeholders around a unified national direction.
+
+### 2012 - Draft Policy Submission
+
+The National Addressing System Steering Committee submitted a draft National Addressing Policy to the Minister of Communication Technology in May 2012.
+
+### 2013 - Federal Executive Council Approval
+
+After broader stakeholder review, the Federal Executive Council approved the National Addressing Policy on November 27, 2013.
+
+### 2014 - National Economic Council Adoption
+
+The National Economic Council adopted the policy on November 20, 2014. This milestone underpins the operational foundation of the 6-digit postal code system used in Nigeria today.
+
+## What This Means for Users Today
+
+### 2014 to Present - From Policy to Practical Use
+
+Nigeria now operates with location-specific 6-digit postal codes. The practical challenge for most users is no longer whether a code exists, but identifying the exact code for the correct street or neighborhood.
+
+### Today - Why Postal Code Lookup Tools Matter
+
+For deliveries, e-commerce checkouts, banking forms, and public-sector applications, accurate code selection remains critical. Modern lookup tools reduce error rates and make the national postal code system easier to use in daily life.
+`;
+
+const nipostPost: BlogPost = buildPost({
   id: '1',
   slug: 'nipost-mail-postal-services-nigeria',
   title: 'Nigerian Postal Service (NIPOST) - Complete Guide to Mail and Postal Services',
@@ -117,20 +239,34 @@ const nipostPost: BlogPost = {
     role: 'Editorial Team',
   },
   publishedAt: '2025-12-27',
-  readingTime: calculateReadingTime(nipostServicesContent),
   category: 'Postal Services',
   tags: ['NIPOST', 'Nigeria Postal Service', 'Mail Services', 'Nigeria Zip Postal Code', 'Postal Orders'],
-  tableOfContents: generateTableOfContents(nipostServicesContent),
-};
+});
 
-export const blogPosts: BlogPost[] = [nipostPost];
+const historyPost: BlogPost = buildPost({
+  id: '2',
+  slug: 'history-of-nigerian-postal-services',
+  title: 'The History of Nigerian Postal Services and Addressing',
+  excerpt: 'From 1852 to the national addressing policy era, this timeline explains how postal services and 6-digit postal codes evolved in Nigeria.',
+  content: historyOfNigerianPostalServicesContent,
+  author: {
+    name: 'Postminer.com.ng Team',
+    role: 'Editorial Team',
+  },
+  publishedAt: '2026-02-14',
+  updatedAt: '2026-02-15',
+  category: 'Postal History',
+  tags: ['NIPOST History', 'Nigeria Postal History', 'Addressing Policy', 'Postal Codes'],
+});
+
+export const blogPosts: BlogPost[] = [nipostPost, historyPost];
 
 export function getBlogPostBySlug(slug: string): BlogPost | undefined {
   return blogPosts.find(post => post.slug === slug);
 }
 
 export function getAllBlogPosts(): BlogPost[] {
-  return blogPosts.sort((a, b) => 
+  return [...blogPosts].sort((a, b) => 
     new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
   );
 }
