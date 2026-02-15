@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MapPin, NavigationArrow, Shield, Lightning, CaretRight, DeviceMobile, Monitor, Warning } from '@phosphor-icons/react';
+import { MapPin, NavigationArrow, Shield, Gauge, CaretRight, DeviceMobile, Monitor, Warning } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -184,7 +184,7 @@ export function LocationPermissionModal({
                   description="One-tap postal code lookup using your device's GPS"
                 />
                 <FeatureItem
-                  icon={Lightning}
+                  icon={Gauge}
                   title="High Accuracy"
                   description="GPS provides the most accurate location data"
                 />

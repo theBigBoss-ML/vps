@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { MapPin, MagnifyingGlass, Crosshair, BookOpen, Calendar, Lightning, CaretDown } from '@phosphor-icons/react';
+import { MapPin, MagnifyingGlass, Globe, BookOpen, Calendar, Timer, CaretDown } from '@phosphor-icons/react';
 import { motion, useInView } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LocationButton } from '@/components/finder/LocationButton';
@@ -174,7 +174,7 @@ function SplitSecondEffect() {
 
       {/* The pill */}
       <span className="split-glow relative inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary shadow-lg shadow-primary/25 backdrop-blur-sm">
-        <Lightning weight="fill" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+        <Timer weight="fill" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
         <span className="font-semibold">Split Second</span>
       </span>
 
@@ -607,7 +607,7 @@ const Index = () => {
                   {/* Badge */}
                   <motion.div variants={fadeUp}>
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary text-xs font-medium rounded-full border border-primary/20 backdrop-blur-sm">
-                      <Crosshair className="h-3.5 w-3.5" />
+                      <Globe className="h-3.5 w-3.5" />
                       AI-assisted GPS + Smart Search
                     </div>
                   </motion.div>
@@ -617,10 +617,10 @@ const Index = () => {
                     variants={fadeUp}
                     className="font-bold tracking-tight text-foreground"
                   >
-                    <span className="block text-2xl sm:text-3xl lg:text-4xl leading-tight">
+                    <span className="block text-4xl sm:text-5xl lg:text-6xl leading-tight">
                       Find Your Nigeria Zip Postal Code
                     </span>
-                    <span className="block mt-3 text-4xl sm:text-5xl lg:text-6xl leading-[1.1]">
+                    <span className="block mt-3 text-2xl sm:text-3xl lg:text-4xl leading-[1.1]">
                       <motion.span
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}

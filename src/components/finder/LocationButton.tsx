@@ -1,4 +1,4 @@
-import { MapPin, SpinnerGap, Crosshair, Info } from '@phosphor-icons/react';
+import { MapPin, SpinnerGap, NavigationArrow, Info } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -78,7 +78,7 @@ export function LocationButton({ onDetect, isLoading, disabled, accuracy, accura
           </>
         ) : (
           <>
-            <Crosshair className="h-6 w-6" aria-hidden="true" />
+            <NavigationArrow className="h-6 w-6" aria-hidden="true" />
             <span>Find My Postal Code</span>
           </>
         )}

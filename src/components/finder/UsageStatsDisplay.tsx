@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from 'react';
-import { Lightning, ThumbsUp, Copy } from '@phosphor-icons/react';
+import { Hash, ThumbsUp, Copy } from '@phosphor-icons/react';
 import { motion, useInView } from 'framer-motion';
 
 interface UsageStatsDisplayProps {
@@ -53,7 +53,7 @@ function formatNumber(num: number) {
 }
 
 const stats = [
-  { key: 'generations', label: 'Codes Generated', Icon: Lightning, color: 'text-emerald-500' },
+  { key: 'generations', label: 'Codes Generated', Icon: Hash, color: 'text-emerald-500' },
   { key: 'likes', label: 'Helpful Votes', Icon: ThumbsUp, color: 'text-emerald-500' },
   { key: 'copies', label: 'Codes Copied', Icon: Copy, color: 'text-emerald-500' },
 ] as const;

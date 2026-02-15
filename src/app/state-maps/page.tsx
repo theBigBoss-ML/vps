@@ -200,7 +200,7 @@ const StateMaps = () => {
             State Postal Code Finder
           </h2>
           <p className="text-muted-foreground text-sm md:text-base max-w-2xl mx-auto">
-            AI-assisted access to official NIPOST maps showing postal codes for any Nigerian state. 
+            AI-assisted access to official NIPOST maps showing postal codes for any Nigerian state.
             Zoom and pan to explore postal codes for specific areas.
           </p>
         </div>

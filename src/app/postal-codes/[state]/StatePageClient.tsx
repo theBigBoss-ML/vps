@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
-import { MapPin, MagnifyingGlass, Crosshair, ArrowRight, MapTrifold } from '@phosphor-icons/react';
+import { MapPin, MagnifyingGlass, Globe, ArrowRight, MapTrifold } from '@phosphor-icons/react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LocationButton } from '@/components/finder/LocationButton';
 import { SmartSearch } from '@/components/finder/SmartSearch';
@@ -227,7 +227,7 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
         <section className="container mx-auto px-4 pb-12 max-w-lg">
           <div className="text-center space-y-4 mb-8">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary text-xs font-medium rounded-full border border-primary/20">
-              <Crosshair className="h-3.5 w-3.5" />
+              <Globe className="h-3.5 w-3.5" />
               {data.name} &middot; Zone {data.zone}
             </div>
             <h1 className="text-3xl md:text-4xl font-bold text-foreground leading-tight">
