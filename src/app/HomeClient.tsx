@@ -629,7 +629,7 @@ const Index = () => {
                     <span className="block text-4xl sm:text-5xl lg:text-6xl leading-tight">
                       Find Your Nigeria Zip Postal Code
                     </span>
-                    <span className="block mt-3 text-2xl sm:text-3xl lg:text-4xl leading-[1.1]">
+                    <span className="block mt-3 text-3xl sm:text-4xl lg:text-5xl leading-[1.1]">
                       <motion.span
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
