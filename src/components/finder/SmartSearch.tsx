@@ -2,12 +2,18 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { MagnifyingGlass, MapPin, X, SpinnerGap } from '@phosphor-icons/react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { PostalCode } from '@/data/postalCodes';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/integrations/supabase/client';
+
+interface SmartSearchResult {
+  postalCode: string;
+  area: string;
+  locality: string;
+  lga: string;
+  state: string;
+}
 
 interface SmartSearchProps {
-  onSelect: (result: PostalCode) => void;
+  onSelect: (result: SmartSearchResult) => void;
   isLoading: boolean;
 }
 
@@ -17,21 +23,6 @@ interface PlacePrediction {
   structured_formatting?: {
     main_text: string;
     secondary_text: string;
-  };
-}
-
-interface PlaceDetails {
-  address_components?: Array<{
-    long_name: string;
-    short_name: string;
-    types: string[];
-  }>;
-  formatted_address?: string;
-  geometry?: {
-    location: {
-      lat: number;
-      lng: number;
-    };
   };
 }
 
@@ -53,17 +44,14 @@ export function SmartSearch({ onSelect, isLoading }: SmartSearchProps) {
 
     setIsFetchingPlaces(true);
     try {
-      const { data, error } = await supabase.functions.invoke('google-places', {
-        body: { action: 'autocomplete', input },
+      const response = await fetch('/api/lookup/smart-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'autocomplete', input }),
       });
-      
-      if (error) {
-        console.error('Edge function error:', error);
-        setPredictions([]);
-        return;
-      }
-      
-      if (data?.status === 'OK' && data?.predictions) {
+      const data = await response.json();
+
+      if (data?.predictions?.length) {
         setPredictions(data.predictions.slice(0, 5));
         setShowSuggestions(true);
       } else {
@@ -77,33 +65,11 @@ export function SmartSearch({ onSelect, isLoading }: SmartSearchProps) {
     }
   }, []);
 
-  const fetchPlaceDetails = useCallback(async (placeId: string): Promise<PlaceDetails | null> => {
-    try {
-      const { data, error } = await supabase.functions.invoke('google-places', {
-        body: { action: 'details', place_id: placeId },
-      });
-      
-      if (error) {
-        console.error('Edge function error:', error);
-        return null;
-      }
-      
-      if (data?.status === 'OK' && data?.result) {
-        return data.result;
-      }
-    } catch (err) {
-      console.error('Fetch error:', err);
-      return null;
-    }
-    return null;
-  }, []);
-
   const handleSearch = useCallback((value: string) => {
     setQuery(value);
     setSelectedIndex(-1);
-    
+
     if (value.length >= 2) {
-      // Use Google Places for suggestions
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => {
         fetchPlacePredictions(value);
@@ -120,38 +86,39 @@ export function SmartSearch({ onSelect, isLoading }: SmartSearchProps) {
     setShowSuggestions(false);
     setIsFetchingPlaces(true);
 
-    const details = await fetchPlaceDetails(prediction.place_id);
-    
-    if (details?.address_components) {
-      const postalCode = details.address_components.find(c => c.types.includes('postal_code'))?.long_name;
-      const locality = details.address_components.find(c => c.types.includes('neighborhood') || c.types.includes('sublocality'))?.long_name;
-      const lga = details.address_components.find(c => c.types.includes('administrative_area_level_2'))?.long_name;
-      const state = details.address_components.find(c => c.types.includes('administrative_area_level_1'))?.long_name;
-      
-      if (postalCode) {
-        const result: PostalCode = {
-          id: `google-${prediction.place_id}`,
-          postalCode,
-          area: prediction.structured_formatting?.main_text || locality || '',
-          locality: locality || '',
-          lga: lga || '',
-          state: state || 'Lagos',
+    try {
+      const response = await fetch('/api/lookup/smart-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'details', place_id: prediction.place_id }),
+      });
+      const data = await response.json();
+
+      if (data?.result?.postalCode) {
+        const result: SmartSearchResult = {
+          postalCode: data.result.postalCode,
+          area: prediction.structured_formatting?.main_text || data.result.locality || '',
+          locality: data.result.locality || '',
+          lga: data.result.lga || '',
+          state: data.result.state || '',
         };
-        
+
         setQuery('');
         setPredictions([]);
         onSelect(result);
       }
+    } catch (err) {
+      console.error('Fetch error:', err);
+    } finally {
+      setIsFetchingPlaces(false);
     }
-    
-    setIsFetchingPlaces(false);
-  }, [fetchPlaceDetails, onSelect]);
+  }, [onSelect]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!showSuggestions) return;
-    
+
     const totalItems = predictions.length;
-    
+
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
@@ -187,7 +154,7 @@ export function SmartSearch({ onSelect, isLoading }: SmartSearchProps) {
         setShowSuggestions(false);
       }
     };
-    
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -253,8 +220,8 @@ export function SmartSearch({ onSelect, isLoading }: SmartSearchProps) {
                 aria-selected={selectedIndex === index}
                 className={cn(
                   "flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors border-b border-border/50 last:border-0",
-                  selectedIndex === index 
-                    ? "bg-nigeria-green/10" 
+                  selectedIndex === index
+                    ? "bg-nigeria-green/10"
                     : "hover:bg-muted/50"
                 )}
                 onClick={() => handleSelectPlace(prediction)}

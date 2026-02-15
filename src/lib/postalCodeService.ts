@@ -1,20 +1,4 @@
 import { LocationResult } from '@/types/location';
-import { defaultPostalCodes, PostalCode } from '@/data/postalCodes';
-
-// Find postal code by state and LGA
-export function getPostalCodeByStateLga(state: string, lga: string): PostalCode | null {
-  const normalizedState = state.toLowerCase().trim();
-  const normalizedLga = lga.toLowerCase().trim();
-  
-  // Find exact match for state and LGA
-  const match = defaultPostalCodes.find(
-    (pc) => 
-      pc.state.toLowerCase() === normalizedState && 
-      pc.lga.toLowerCase() === normalizedLga
-  );
-  
-  return match || null;
-}
 
 // Rate limiting helper
 let lastRequestTime = 0;
@@ -26,11 +10,11 @@ export async function rateLimitedGetPostalCode(
 ): Promise<LocationResult | null> {
   const now = Date.now();
   const timeSinceLastRequest = now - lastRequestTime;
-  
+
   if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
     await new Promise(resolve => setTimeout(resolve, MIN_REQUEST_INTERVAL - timeSinceLastRequest));
   }
-  
+
   lastRequestTime = Date.now();
   const response = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`);
 

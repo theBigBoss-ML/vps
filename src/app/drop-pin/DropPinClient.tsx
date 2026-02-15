@@ -81,25 +81,24 @@ const DropPin = () => {
     };
     
     try {
-      // Get address from OpenStreetMap (Nominatim)
-      const nominatimResponse = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`,
-        {
-          headers: {
-            'User-Agent': 'NigerianPostalCodeFinder/1.0'
+      // Get address via server-side reverse geocode proxy
+      const response = await fetch('/api/lookup/reverse-geocode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lat, lng }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.result) {
+          newPin.address = data.result.address || null;
+          newPin.state = data.result.state || null;
+          newPin.lga = data.result.lga || null;
+
+          if (data.result.postalCode) {
+            newPin.postalCode = data.result.postalCode;
+            newPin.source = 'nominatim';
           }
-        }
-      );
-      
-      if (nominatimResponse.ok) {
-        const nominatimData = await nominatimResponse.json();
-        newPin.address = nominatimData.display_name || null;
-        newPin.state = nominatimData.address?.state || null;
-        newPin.lga = nominatimData.address?.county || nominatimData.address?.city || null;
-        
-        if (nominatimData.address?.postcode) {
-          newPin.postalCode = nominatimData.address.postcode;
-          newPin.source = 'nominatim';
         }
       }
 

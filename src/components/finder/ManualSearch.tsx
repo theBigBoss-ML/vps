@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MagnifyingGlass } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { nigeriaStates, getLgasByState } from '@/data/nigeriaStates';
 
 interface ManualSearchProps {
   onSearch: (state: string, lga: string) => void;
@@ -17,14 +16,25 @@ interface ManualSearchProps {
 }
 
 export function ManualSearch({ onSearch, isLoading }: ManualSearchProps) {
+  const [states, setStates] = useState<string[]>([]);
   const [selectedState, setSelectedState] = useState<string>('');
   const [selectedLga, setSelectedLga] = useState<string>('');
   const [lgas, setLgas] = useState<string[]>([]);
 
+  useEffect(() => {
+    fetch('/api/states')
+      .then((res) => res.json())
+      .then((data) => setStates(data.states || []))
+      .catch(() => setStates([]));
+  }, []);
+
   const handleStateChange = (value: string) => {
     setSelectedState(value);
     setSelectedLga('');
-    setLgas(getLgasByState(value));
+    fetch(`/api/states?state=${encodeURIComponent(value)}`)
+      .then((res) => res.json())
+      .then((data) => setLgas(data.lgas || []))
+      .catch(() => setLgas([]));
   };
 
   const handleSearch = () => {
@@ -41,7 +51,7 @@ export function ManualSearch({ onSearch, isLoading }: ManualSearchProps) {
             Select State
           </Label>
           <Select value={selectedState} onValueChange={handleStateChange}>
-            <SelectTrigger 
+            <SelectTrigger
               id="state-select"
               className="w-full h-12"
               aria-label="Select your state"
@@ -49,9 +59,9 @@ export function ManualSearch({ onSearch, isLoading }: ManualSearchProps) {
               <SelectValue placeholder="Choose your state" />
             </SelectTrigger>
             <SelectContent className="max-h-[300px]">
-              {nigeriaStates.map((state) => (
-                <SelectItem key={state.name} value={state.name}>
-                  {state.name}
+              {states.map((state) => (
+                <SelectItem key={state} value={state}>
+                  {state}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -62,12 +72,12 @@ export function ManualSearch({ onSearch, isLoading }: ManualSearchProps) {
           <Label htmlFor="lga-select" className="text-sm font-medium">
             Select LGA
           </Label>
-          <Select 
-            value={selectedLga} 
+          <Select
+            value={selectedLga}
             onValueChange={setSelectedLga}
             disabled={!selectedState}
           >
-            <SelectTrigger 
+            <SelectTrigger
               id="lga-select"
               className="w-full h-12"
               aria-label="Select your Local Government Area"

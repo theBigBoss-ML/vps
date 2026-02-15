@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  productionBrowserSourceMaps: false,
   async headers() {
     return [
       {
@@ -26,7 +27,7 @@ const nextConfig = {
               "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://web.archive.org https://*.tile.openstreetmap.org",
-              "connect-src 'self' https://maps.googleapis.com https://nominatim.openstreetmap.org https://*.tile.openstreetmap.org https://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com",
+              "connect-src 'self' https://*.tile.openstreetmap.org https://www.googletagmanager.com https://www.google-analytics.com",
               "font-src 'self' data:",
               "frame-src https://www.googletagmanager.com",
               "object-src 'none'",

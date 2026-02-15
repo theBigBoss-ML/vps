@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from 'next/dynamic';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { MapPin, MagnifyingGlass, Globe, ArrowRight, MapTrifold } from '@phosphor-icons/react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -17,9 +17,7 @@ import { useRecentLocations } from '@/hooks/useRecentLocations';
 import { useTheme } from '@/hooks/useTheme';
 import { useUsageStats } from '@/hooks/useUsageStats';
 import { LocationResult, LookupStatus } from '@/types/location';
-import { rateLimitedGetPostalCode, getPostalCodeByStateLga } from '@/lib/postalCodeService';
-import { PostalCode } from '@/data/postalCodes';
-import { getLgasByState } from '@/data/nigeriaStates';
+import { rateLimitedGetPostalCode } from '@/lib/postalCodeService';
 import { toast } from 'sonner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import type { StatePageData } from '@/data/statePageData';
@@ -85,7 +83,7 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
     }
   }, [getCurrentPosition, clearError, geoError, trackStat, addRecentLocation]);
 
-  const handleSmartSearch = useCallback((searchResult: PostalCode) => {
+  const handleSmartSearch = useCallback((searchResult: { postalCode: string; area: string; locality: string; lga: string; state: string }) => {
     const locationResult: LocationResult = {
       postalCode: searchResult.postalCode,
       source: 'database',
@@ -113,22 +111,28 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
     setError(null);
     setStatus('geocoding');
     try {
-      const match = getPostalCodeByStateLga(state, lga);
-      if (match) {
+      const response = await fetch('/api/lookup/manual', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ state, lga }),
+      });
+      const responseData = await response.json();
+
+      if (responseData.result) {
         const locationResult: LocationResult = {
-          postalCode: match.postalCode,
+          postalCode: responseData.result.postalCode,
           source: 'database',
-          address: `${match.area}, ${match.lga}, ${match.state}`,
-          lga: match.lga,
-          area: match.area,
-          state: match.state,
-          confidence: 0.8,
+          address: responseData.result.address,
+          lga: responseData.result.lga,
+          area: responseData.result.area,
+          state: responseData.result.state,
+          confidence: 100,
           coordinates: { lat: 0, lng: 0 },
           timestamp: new Date(),
         };
         setResult(locationResult);
         setStatus('success');
-        trackStat('generation', match.postalCode);
+        trackStat('generation', responseData.result.postalCode);
       } else {
         setError('No postal code found for that combination.');
         setStatus('error');
@@ -172,7 +176,15 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
     }
   }, [result, trackStat]);
 
-  const lgas = getLgasByState(data.name === 'FCT Abuja' ? 'FCT' : data.name);
+  const [lgas, setLgas] = useState<string[]>([]);
+
+  useEffect(() => {
+    const stateName = data.name === 'FCT Abuja' ? 'FCT' : data.name;
+    fetch(`/api/states?state=${encodeURIComponent(stateName)}`)
+      .then((res) => res.json())
+      .then((d) => setLgas(d.lgas || []))
+      .catch(() => setLgas([]));
+  }, [data.name]);
 
   // Schema markup
   const faqSchema = {

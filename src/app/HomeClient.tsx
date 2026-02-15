@@ -21,8 +21,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useUsageStats } from '@/hooks/useUsageStats';
 import { useLocationPermission } from '@/hooks/useLocationPermission';
 import { LocationResult, LookupStatus, RecentLocation } from '@/types/location';
-import { rateLimitedGetPostalCode, getPostalCodeByStateLga } from '@/lib/postalCodeService';
-import { PostalCode } from '@/data/postalCodes';
+import { rateLimitedGetPostalCode } from '@/lib/postalCodeService';
 import { getAllBlogPosts } from '@/data/blogPosts';
 import { toast } from 'sonner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -295,7 +294,7 @@ const Index = () => {
     setError('Geolocation is not supported by your browser. Please use manual search.');
   }, [checkPermission, performGpsLookup, showModalForGpsAttempt]);
 
-  const handleSmartSearch = useCallback((result: PostalCode) => {
+  const handleSmartSearch = useCallback((result: { postalCode: string; area: string; locality: string; lga: string; state: string }) => {
     const locationResult: LocationResult = {
       postalCode: result.postalCode,
       source: 'database',
@@ -319,32 +318,42 @@ const Index = () => {
     toast.success('Nigeria zip postal code found!');
   }, [addRecentLocation, trackStat]);
 
-  const handleManualSearch = useCallback((state: string, lga: string) => {
-    const result = getPostalCodeByStateLga(state, lga);
-    if (result) {
-      const locationResult: LocationResult = {
-        postalCode: result.postalCode,
-        source: 'database',
-        address: `${result.locality}, ${result.area}, ${result.lga}, ${result.state}`,
-        lga: result.lga,
-        area: result.area,
-        state: result.state,
-        confidence: 100,
-        coordinates: { lat: 0, lng: 0 },
-        timestamp: new Date(),
-      };
-      setResult(locationResult);
-      setStatus('success');
-      addRecentLocation({
-        postalCode: result.postalCode,
-        address: locationResult.address,
-        area: result.area,
-        lga: result.lga,
+  const handleManualSearch = useCallback(async (state: string, lga: string) => {
+    try {
+      const response = await fetch('/api/lookup/manual', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ state, lga }),
       });
-      trackStat('generation', result.postalCode);
-      toast.success('Nigeria zip postal code found!');
-    } else {
-      setError(`No postal code found for ${lga}, ${state}. Try using the smart search instead.`);
+      const data = await response.json();
+
+      if (data.result) {
+        const locationResult: LocationResult = {
+          postalCode: data.result.postalCode,
+          source: 'database',
+          address: data.result.address,
+          lga: data.result.lga,
+          area: data.result.area,
+          state: data.result.state,
+          confidence: 100,
+          coordinates: { lat: 0, lng: 0 },
+          timestamp: new Date(),
+        };
+        setResult(locationResult);
+        setStatus('success');
+        addRecentLocation({
+          postalCode: data.result.postalCode,
+          address: locationResult.address,
+          area: data.result.area,
+          lga: data.result.lga,
+        });
+        trackStat('generation', data.result.postalCode);
+        toast.success('Nigeria zip postal code found!');
+      } else {
+        setError(`No postal code found for ${lga}, ${state}. Try using the smart search instead.`);
+      }
+    } catch {
+      setError(`Failed to look up postal code. Please try again.`);
     }
   }, [addRecentLocation, trackStat]);
 

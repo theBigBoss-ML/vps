@@ -1,5 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
+import { createServerSupabase } from "@/lib/supabaseServer";
 
 type UsageStatType = "generation" | "like" | "dislike" | "copy";
 
@@ -24,43 +23,21 @@ const statTypeToSnapshotKey: Record<UsageStatType, keyof UsageStatsSnapshot> = {
   copy: "copies",
 };
 
-async function getCountForStatType(
-  supabase: ReturnType<typeof createClient<Database>>,
-  statType: UsageStatType
-): Promise<number> {
-  const { count, error } = await supabase
-    .from("usage_stats")
-    .select("id", { count: "exact", head: true })
-    .eq("stat_type", statType);
-
-  if (error) {
-    throw error;
-  }
-
-  return count ?? 0;
-}
-
 export async function getUsageStatsSnapshot(): Promise<UsageStatsSnapshot> {
   const statTypes: UsageStatType[] = ["generation", "like", "dislike", "copy"];
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return EMPTY_USAGE_STATS;
-  }
-
-  const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
 
   try {
+    const supabase = createServerSupabase();
+
     const counts = await Promise.all(
       statTypes.map(async (statType) => {
-        const count = await getCountForStatType(supabase, statType);
-        return [statType, count] as const;
+        const { count, error } = await supabase
+          .from("usage_stats")
+          .select("id", { count: "exact", head: true })
+          .eq("stat_type", statType);
+
+        if (error) throw error;
+        return [statType, count ?? 0] as const;
       })
     );
 
