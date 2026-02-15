@@ -269,7 +269,7 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
             <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Home</Link>
             <Link href="/drop-pin" className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block">Find on Map</Link>
             <Link href="/state-maps" className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block">State Maps</Link>
-            <Link href="/postal-codes" className="text-sm text-muted-foreground hover:text-primary transition-colors hidden lg:block">States</Link>
+            <Link href="/postal-codes" className="text-sm text-muted-foreground hover:text-primary transition-colors hidden lg:block">Find by State</Link>
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
           </nav>
         </div>

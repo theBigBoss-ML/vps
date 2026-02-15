@@ -564,7 +564,7 @@ const Index = () => {
               href="/postal-codes"
               className="text-sm text-muted-foreground hover:text-primary transition-colors hidden lg:block"
             >
-              States
+              Find by State
             </Link>
             <Link
               href="/blog"

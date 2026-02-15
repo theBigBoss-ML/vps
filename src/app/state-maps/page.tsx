@@ -164,7 +164,7 @@ const StateMaps = () => {
               href="/postal-codes"
               className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block"
             >
-              States
+              Find by State
             </Link>
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
           </nav>
