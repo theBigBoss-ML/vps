@@ -17,7 +17,7 @@ export function BlogCard({ post }: BlogCardProps) {
 
   return (
     <Card className="group h-full flex flex-col overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
-      <CardHeader className="pb-3 text-center">
+      <CardHeader className="pb-3">
         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
           <Badge variant="secondary" className="text-xs font-medium">
             {post.category}
@@ -30,14 +30,14 @@ export function BlogCard({ post }: BlogCardProps) {
         </Link>
       </CardHeader>
 
-      <CardContent className="flex-1 pb-3 text-center">
+      <CardContent className="flex-1 pb-3">
         <p className="text-sm text-muted-foreground line-clamp-3">
           {post.excerpt}
         </p>
       </CardContent>
 
-      <CardFooter className="pt-3 border-t border-border/50 flex flex-col items-center gap-3">
-        <div className="flex items-center justify-center w-full text-xs text-muted-foreground">
+      <CardFooter className="pt-3 border-t border-border/50 flex flex-col gap-3">
+        <div className="flex items-center justify-between w-full text-xs text-muted-foreground">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1">
               <Calendar className="h-3.5 w-3.5" />
@@ -52,7 +52,7 @@ export function BlogCard({ post }: BlogCardProps) {
 
         <Link
           href={`/blog/${post.slug}`}
-          className="flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors self-center"
+          className="flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors self-start"
         >
           Read article
           <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />

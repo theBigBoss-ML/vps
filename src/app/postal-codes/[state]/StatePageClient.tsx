@@ -335,11 +335,11 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
 
         {/* State Overview */}
         <section className="border-t border-border/30">
-          <div className="container mx-auto px-4 py-12 md:py-16 max-w-4xl text-center">
+          <div className="container mx-auto px-4 py-12 md:py-16 max-w-4xl">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
               About {data.name} Postal Codes
             </h2>
-            <div className="text-sm md:text-base text-muted-foreground leading-relaxed space-y-4 text-center">
+            <div className="text-sm md:text-base text-muted-foreground leading-relaxed space-y-4 text-left">
               {data.description.split('\n\n').map((paragraph, i) => (
                 <p key={i}>{paragraph}</p>
               ))}
@@ -369,7 +369,7 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
 
         {/* LGA Reference */}
         <section className="border-t border-border/30">
-          <div className="container mx-auto px-4 py-12 md:py-16 max-w-4xl text-center">
+          <div className="container mx-auto px-4 py-12 md:py-16 max-w-4xl">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
               Local Government Areas in {data.name}
             </h2>
@@ -383,7 +383,7 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {lgas.map((lga) => (
-                <div key={lga} className="px-3 py-2 bg-card/50 border border-border/40 rounded-lg text-sm text-muted-foreground text-center">
+                <div key={lga} className="px-3 py-2 bg-card/50 border border-border/40 rounded-lg text-sm text-muted-foreground text-left">
                   {lga}
                 </div>
               ))}
@@ -393,17 +393,15 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
 
         {/* FAQ */}
         <section className="border-t border-border/30">
-          <div className="container mx-auto px-4 py-12 md:py-16 max-w-4xl text-center">
+          <div className="container mx-auto px-4 py-12 md:py-16 max-w-4xl">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
               Frequently Asked Questions — {data.name} Postal Codes
             </h2>
             <Accordion type="single" collapsible className="space-y-3 max-w-3xl mx-auto">
               {data.faq.map((item, i) => (
                 <AccordionItem key={i} value={`faq-${i}`} className="border border-border/40 rounded-xl px-4">
-                  <AccordionTrigger className="text-sm font-medium">
-                    <span className="block flex-1 text-center pr-6">{item.question}</span>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed text-center">
+                  <AccordionTrigger className="text-left text-sm font-medium">{item.question}</AccordionTrigger>
+                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed text-left">
                     {item.answer}
                   </AccordionContent>
                 </AccordionItem>
@@ -415,7 +413,7 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
         {/* Related States */}
         {relatedStates.length > 0 && (
           <section className="border-t border-border/30">
-            <div className="container mx-auto px-4 py-12 md:py-16 max-w-4xl text-center">
+            <div className="container mx-auto px-4 py-12 md:py-16 max-w-4xl">
               <h2 className="text-xl md:text-2xl font-bold text-foreground mb-6">
                 Nearby States
               </h2>
@@ -424,13 +422,13 @@ export default function StatePageClient({ data, relatedStates }: StatePageClient
                   <Link
                     key={rs.slug}
                     href={`/postal-codes/${rs.slug}`}
-                    className="p-4 bg-card/50 border border-border/40 rounded-lg hover:border-primary/40 transition-colors group text-center"
+                    className="p-4 bg-card/50 border border-border/40 rounded-lg hover:border-primary/40 transition-colors group"
                   >
-                    <div className="flex items-center justify-center gap-2 mb-2">
+                    <div className="flex items-center justify-between mb-2">
                       <span className="font-semibold text-foreground">{rs.name}</span>
                       <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
-                    <p className="text-xs text-muted-foreground text-center">
+                    <p className="text-xs text-muted-foreground">
                       {rs.capital} &middot; Zone {rs.zone} &middot; {rs.postalCodeRange}
                     </p>
                   </Link>

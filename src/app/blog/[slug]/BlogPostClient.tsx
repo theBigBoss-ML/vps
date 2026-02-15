@@ -72,7 +72,7 @@ export default function BlogPostClient({ post, relatedPosts }: BlogPostClientPro
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <article className="lg:col-span-8">
-            <header className="mb-8 text-center">
+            <header className="mb-8">
               <Badge variant="secondary" className="mb-4">
                 {post.category}
               </Badge>
@@ -83,8 +83,8 @@ export default function BlogPostClient({ post, relatedPosts }: BlogPostClientPro
                 {post.excerpt}
               </p>
 
-              <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground pb-6 border-b border-border/50">
-                <div className="flex items-center gap-2 text-center">
+              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground pb-6 border-b border-border/50">
+                <div className="flex items-center gap-2">
                   <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
                     <User className="h-4 w-4 text-primary" />
                   </div>
@@ -107,6 +107,7 @@ export default function BlogPostClient({ post, relatedPosts }: BlogPostClientPro
                   variant="ghost"
                   size="sm"
                   onClick={handleShare}
+                  className="ml-auto"
                 >
                   <ShareNetwork className="h-4 w-4 mr-2" />
                   Share
@@ -121,7 +122,7 @@ export default function BlogPostClient({ post, relatedPosts }: BlogPostClientPro
             <BlogContent content={post.content} />
 
             <div className="mt-10 pt-6 border-t border-border/50">
-              <div className="flex items-center justify-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Tag className="h-4 w-4 text-muted-foreground" />
                 {post.tags.map((tag) => (
                   <Badge key={tag} variant="outline" className="text-xs">
@@ -154,13 +155,13 @@ export default function BlogPostClient({ post, relatedPosts }: BlogPostClientPro
 
               {relatedPosts.length > 0 && (
                 <div className="p-4 bg-card/50 border border-border/50 rounded-xl">
-                  <h4 className="text-sm font-semibold text-foreground mb-4 text-center">Related Articles</h4>
+                  <h4 className="text-sm font-semibold text-foreground mb-4">Related Articles</h4>
                   <div className="space-y-3">
                     {relatedPosts.map((relatedPost) => (
                       <Link
                         key={relatedPost.id}
                         href={`/blog/${relatedPost.slug}`}
-                        className="block p-3 rounded-lg hover:bg-muted/50 transition-colors text-center"
+                        className="block p-3 rounded-lg hover:bg-muted/50 transition-colors"
                       >
                         <h5 className="text-sm font-medium text-foreground line-clamp-2">
                           {relatedPost.title}
