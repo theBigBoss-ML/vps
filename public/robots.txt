@@ -4,3 +4,4 @@ Disallow: /_next/static/
 Disallow: /api/
 
 Sitemap: https://postminer.com.ng/sitemap.xml
+Sitemap: https://postminer.com.ng/sitemap-images.xml

@@ -1,6 +1,5 @@
 import "./globals.css";
-import "leaflet/dist/leaflet.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { Providers } from "./providers";
@@ -26,9 +25,11 @@ const jetBrainsMono = JetBrains_Mono({
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: siteTitle,
+  name: "Postminer.com.ng",
   url: siteUrl,
   logo: `${siteUrl}/icon-512.png`,
+  description:
+    "AI-based Nigeria zip postal code lookup using GPS, drop-pin, and smart search.",
 };
 
 const websiteSchema = {
@@ -41,6 +42,13 @@ const websiteSchema = {
     target: `${siteUrl}/?q={search_term_string}`,
     "query-input": "required name=search_term_string",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
 };
 
 export const metadata: Metadata = {

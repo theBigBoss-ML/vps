@@ -62,5 +62,55 @@ export default async function StatePage({
     .map((rs) => statePageData.find((s) => s.slug === rs))
     .filter(Boolean) as StatePageData[];
 
-  return <StatePageClient data={data} relatedStates={relatedStates} />;
+  const faqSchema =
+    data.faq.length > 0
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: data.faq.map((item) => ({
+            '@type': 'Question',
+            name: item.question,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: item.answer,
+            },
+          })),
+        }
+      : null;
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${siteUrl}/` },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Postal Codes',
+        item: `${siteUrl}/postal-codes`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: `${data.name} Postal Code`,
+        item: `${siteUrl}/postal-codes/${data.slug}`,
+      },
+    ],
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
+      <StatePageClient data={data} relatedStates={relatedStates} />
+    </>
+  );
 }

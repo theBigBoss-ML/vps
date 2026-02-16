@@ -7,7 +7,11 @@ const siteTitle = "Postminer.com.ng";
 const siteDescription =
   "AI-based, free and fast Nigeria zip postal code lookup with GPS, drop-pin, and smart manual search.";
 
-function buildSoftwareApplicationSchema(likes: number, dislikes: number) {
+function buildSoftwareApplicationSchema(
+  likes: number,
+  dislikes: number,
+  generations: number
+) {
   const totalFeedbackVotes = likes + dislikes;
 
   if (totalFeedbackVotes <= 0) {
@@ -30,18 +34,24 @@ function buildSoftwareApplicationSchema(likes: number, dislikes: number) {
     description: siteDescription,
     operatingSystem: "Web",
     applicationCategory: "UtilitiesApplication",
+    applicationSubCategory: "Postal Code Lookup",
     offers: {
       "@type": "Offer",
       price: "0",
       priceCurrency: "NGN",
+      availability: "https://schema.org/InStock",
     },
     aggregateRating: {
       "@type": "AggregateRating",
       ratingValue: Number(clampedRating.toFixed(1)),
       ratingCount: totalFeedbackVotes,
-      reviewCount: likes,
       bestRating: ratingScaleMax,
       worstRating: ratingScaleMin,
+    },
+    interactionStatistic: {
+      "@type": "InteractionCounter",
+      interactionType: "https://schema.org/UseAction",
+      userInteractionCount: generations,
     },
   };
 }
@@ -50,7 +60,11 @@ export default async function HomePage() {
   noStore();
 
   const stats = await getUsageStatsSnapshot();
-  const reviewSchema = buildSoftwareApplicationSchema(stats.likes, stats.dislikes);
+  const reviewSchema = buildSoftwareApplicationSchema(
+    stats.likes,
+    stats.dislikes,
+    stats.generations
+  );
 
   return (
     <>

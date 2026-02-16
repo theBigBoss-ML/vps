@@ -27,7 +27,7 @@ const nextConfig = {
               "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://web.archive.org https://*.tile.openstreetmap.org",
-              "connect-src 'self' https://*.tile.openstreetmap.org https://www.googletagmanager.com https://www.google-analytics.com",
+              "connect-src 'self' https://*.tile.openstreetmap.org https://www.googletagmanager.com https://www.google-analytics.com https://*.supabase.co",
               "font-src 'self' data:",
               "frame-src https://www.googletagmanager.com",
               "object-src 'none'",

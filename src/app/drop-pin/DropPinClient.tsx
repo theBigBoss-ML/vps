@@ -1,5 +1,6 @@
 "use client";
 
+import "leaflet/dist/leaflet.css";
 import { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { MapPin, Copy, ShareNetwork, Star, NavigationArrow, MagnifyingGlass, SpinnerGap, MapPinLine, Trash } from '@phosphor-icons/react';
