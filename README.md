@@ -40,7 +40,7 @@ npm run typecheck
 Set these in `.env`:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `NEXT_PUBLIC_SUPABASE_ANON`
 - `NEXT_PUBLIC_SUPABASE_PROJECT_ID` (optional)
 - `GOOGLE_MAPS_API_KEY` (required for `/api/geocode` lookups)
 - `NEXT_PUBLIC_SITE_URL` (optional, defaults to `https://postminer.com.ng`)
