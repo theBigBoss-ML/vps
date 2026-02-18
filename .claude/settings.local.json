@@ -102,7 +102,10 @@
       "mcp__plugin_playwright_playwright__browser_snapshot",
       "mcp__plugin_playwright_playwright__browser_resize",
       "WebFetch(domain:www.postminer.com.ng)",
-      "WebFetch(domain:nigeriapostalcode.com)"
+      "WebFetch(domain:nigeriapostalcode.com)",
+      "Bash(gh api:*)",
+      "Bash(git ls-remote:*)",
+      "Bash(git remote set-url:*)"
     ]
   }
 }
